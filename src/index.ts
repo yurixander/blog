@@ -1,43 +1,77 @@
 import { config } from "dotenv";
-import { getLastEditedTime } from "./notionApi.js";
-import { requireEnvVariable } from "./util.js";
+import { fetchLastEditedTime } from "./notionApi.js";
+import { EnvironmentVariable, requireEnvVariable } from "./util.js";
 import fs from "fs";
+import { tryInit } from "./git.js";
 
-// Load Notion API token from environment.
+// Load environment variables from `.env` file.
 config();
 
-const CHECK_INTERVAL = parseInt(requireEnvVariable(process.env.CHECK_INTERVAL));
-const LAST_EDITED_TIME_FILENAME = "lastEditedTime.json";
+const lastEditedTimeFilename = requireEnvVariable(
+  EnvironmentVariable.LastEditedTimeFilename
+);
 
 async function updateLocalLastEditedTime(
-  lastEditedTime: string
+  newLastEditedTime: string
 ): Promise<void> {
-  const saveFilename = LAST_EDITED_TIME_FILENAME;
+  const saveFilename = lastEditedTimeFilename;
 
-  fs.writeFileSync(saveFilename, lastEditedTime);
+  fs.writeFileSync(saveFilename, newLastEditedTime);
 }
 
-async function getLocalLastEditedTime(): Promise<string> {
-  const saveFilename = LAST_EDITED_TIME_FILENAME;
+async function getLocalLastEditedTime(): Promise<string | null> {
+  const saveFilename = lastEditedTimeFilename;
 
   if (!fs.existsSync(saveFilename)) {
-    const DEFAULT_LAST_EDITED_TIME = "0";
-
-    updateLocalLastEditedTime(DEFAULT_LAST_EDITED_TIME);
-
-    return DEFAULT_LAST_EDITED_TIME;
+    return null;
   }
 
   return fs.readFileSync(saveFilename, "utf-8");
 }
 
 async function checkForChanges(): Promise<boolean> {
-  const notionLastEditedTime = await getLastEditedTime();
   const localLastEditedTime = await getLocalLastEditedTime();
+
+  if (localLastEditedTime === null) {
+    return true;
+  }
+
+  const notionLastEditedTime = await fetchLastEditedTime();
 
   return notionLastEditedTime !== localLastEditedTime;
 }
 
+async function deploy(): Promise<void> {
+  const didInitiate = await tryInit();
+
+  console.log(
+    didInitiate
+      ? "Initialized virtual Git repository."
+      : "Virtual Git repository already initialized."
+  );
+
+  // TODO: Re-create HTML & CSS files, and re-deploy by pushing to GitHub's `pages` branch.
+}
+
+async function checkAndDeploy(): Promise<void> {
+  // If there are no changes, do nothing.
+  if (!(await checkForChanges())) {
+    return;
+  }
+
+  const notionLastEditedTime = await fetchLastEditedTime();
+
+  updateLocalLastEditedTime(notionLastEditedTime);
+  console.log("Changes detected; re-deploying...");
+  deploy();
+}
+
 // Check for changes every X milliseconds (based in the
 // `.env` environment variable).
-setInterval(() => checkForChanges(), CHECK_INTERVAL);
+setInterval(
+  () => checkAndDeploy(),
+  parseInt(requireEnvVariable(EnvironmentVariable.CheckInterval))
+);
+
+// Initial check when the script is first run.
+checkAndDeploy();
