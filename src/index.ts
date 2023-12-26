@@ -1,18 +1,41 @@
-import { Client } from "@notionhq/client";
 import { config } from "dotenv";
-import { getPageContent, getPageDetails } from "./notionApi";
-import { assertEnvVariable } from "./util";
+import { getLastEditedTime } from "./notionApi.js";
+import { requireEnvVariable } from "./util.js";
+import fs from "fs";
 
 // Load Notion API token from environment.
 config();
 
-const token = process.env.NOTION_TOKEN;
-const notion = new Client({ auth: token });
-const blogPageId = assertEnvVariable(process.env.NOTION_PAGE_ID);
-const CHECK_INTERVAL = parseInt(assertEnvVariable(process.env.CHECK_INTERVAL));
+const CHECK_INTERVAL = parseInt(requireEnvVariable(process.env.CHECK_INTERVAL));
+const LAST_EDITED_TIME_FILENAME = "lastEditedTime.json";
 
-async function checkForChanges() {
-  // TODO: Implement this function.
+async function updateLocalLastEditedTime(
+  lastEditedTime: string
+): Promise<void> {
+  const saveFilename = LAST_EDITED_TIME_FILENAME;
+
+  fs.writeFileSync(saveFilename, lastEditedTime);
+}
+
+async function getLocalLastEditedTime(): Promise<string> {
+  const saveFilename = LAST_EDITED_TIME_FILENAME;
+
+  if (!fs.existsSync(saveFilename)) {
+    const DEFAULT_LAST_EDITED_TIME = "0";
+
+    updateLocalLastEditedTime(DEFAULT_LAST_EDITED_TIME);
+
+    return DEFAULT_LAST_EDITED_TIME;
+  }
+
+  return fs.readFileSync(saveFilename, "utf-8");
+}
+
+async function checkForChanges(): Promise<boolean> {
+  const notionLastEditedTime = await getLastEditedTime();
+  const localLastEditedTime = await getLocalLastEditedTime();
+
+  return notionLastEditedTime !== localLastEditedTime;
 }
 
 // Check for changes every X milliseconds (based in the
