@@ -1,0 +1,21 @@
+{
+  "name": "blog",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "repository": "https://github.com/yurixander/blog-1.git",
+  "author": "yurixander <101931215+yurixander@users.noreply.github.com>",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc --build .",
+    "start": "yarn build && node dist/index.js"
+  },
+  "dependencies": {
+    "@notionhq/client": "^2.2.14",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
