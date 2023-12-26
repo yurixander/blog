@@ -2,7 +2,7 @@ import { config } from "dotenv";
 import { fetchLastEditedTime } from "./notionApi.js";
 import { EnvironmentVariable, requireEnvVariable } from "./util.js";
 import fs from "fs";
-import { tryInit } from "./git.js";
+import { tryInit, tryPull } from "./git.js";
 
 // Load environment variables from `.env` file.
 config();
@@ -42,13 +42,19 @@ async function checkForChanges(): Promise<boolean> {
 }
 
 async function deploy(): Promise<void> {
-  const didInitiate = await tryInit();
-
   console.log(
-    didInitiate
+    (await tryInit())
       ? "Initialized virtual Git repository."
       : "Virtual Git repository already initialized."
   );
+
+  const didPull = await tryPull();
+
+  if (didPull) {
+    console.log(
+      "Pulled changes from remote Git repository. Manual intervention may have occurred."
+    );
+  }
 
   // TODO: Re-create HTML & CSS files, and re-deploy by pushing to GitHub's `pages` branch.
 }
@@ -56,6 +62,8 @@ async function deploy(): Promise<void> {
 async function checkAndDeploy(): Promise<void> {
   // If there are no changes, do nothing.
   if (!(await checkForChanges())) {
+    console.log("No changes detected.");
+
     return;
   }
 

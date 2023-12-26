@@ -35,8 +35,15 @@ export async function tryInit(): Promise<boolean> {
 
   const git = getOrSetGit();
 
-  await git.clone(githubProjectUrl, virtualPath);
+  await git.clone(githubProjectUrl, ".");
   await git.checkout(githubPagesBranchName);
 
   return true;
+}
+
+export async function tryPull(): Promise<boolean> {
+  const git = getOrSetGit();
+  const result = await git.pull();
+
+  return result.files.length > 0;
 }
