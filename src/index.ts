@@ -1,29 +1,22 @@
 import { config } from "dotenv";
-import {
-  fetchLastEditedTime,
-  fetchPageContents,
-  fetchPageDetails,
-} from "./notionApi.js";
+import { fetchLastEditedTime, fetchSharedPages } from "./notionApi.js";
 import {
   EnvironmentVariable,
   Html,
-  isBlockObjectResponse,
+  assert,
+  convertTitleToFilename,
+  getOrSetLogger,
   requireEnvVariable,
 } from "./util.js";
 import fs from "fs";
 import {
-  emptyWorkspace,
   stageCommitAndPush,
-  tryInit,
-  tryResetWorkspace,
+  tryInitializeWorkspace,
+  tryCleanWorkspace,
   writeWorkspaceFile,
 } from "./workspace.js";
-import {
-  HtmlTemplate,
-  loadStylesheet,
-  renderTemplate,
-  transformBlockToHtml,
-} from "./html.js";
+import { renderPage } from "./html.js";
+import { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints.js";
 
 export type LayoutTemplateReplacements = {
   title: string;
@@ -42,113 +35,135 @@ const lastEditedTimeFilename = requireEnvVariable(
   EnvironmentVariable.LastEditedTimeFilename
 );
 
-async function updateLocalLastEditedTime(
-  newLastEditedTime: string
+async function updateLocalLastEditedTimes(
+  pages: PageObjectResponse[]
 ): Promise<void> {
-  const saveFilename = lastEditedTimeFilename;
+  const existingLastEditedTimes = await getLocalLastEditedTimes();
+  const newLastEditedTimes: Record<string, string> = {};
 
-  fs.writeFileSync(saveFilename, newLastEditedTime);
+  for (const page of pages) {
+    newLastEditedTimes[page.id] = page.last_edited_time;
+  }
+
+  // Merge with existing last edited times.
+  Object.assign({}, existingLastEditedTimes, newLastEditedTimes);
+
+  fs.writeFileSync(
+    lastEditedTimeFilename,
+    JSON.stringify(newLastEditedTimes),
+    "utf-8"
+  );
 }
 
-async function getLocalLastEditedTime(): Promise<string | null> {
+async function getLocalLastEditedTimes(): Promise<Record<
+  string,
+  string
+> | null> {
   const saveFilename = lastEditedTimeFilename;
 
   if (!fs.existsSync(saveFilename)) {
     return null;
   }
 
-  return fs.readFileSync(saveFilename, "utf-8");
+  return JSON.parse(fs.readFileSync(saveFilename, "utf-8"));
 }
 
 async function checkForChanges(): Promise<boolean> {
-  const localLastEditedTime = await getLocalLastEditedTime();
+  const localLastEditedTimes = await getLocalLastEditedTimes();
 
-  if (localLastEditedTime === null) {
+  if (localLastEditedTimes === null) {
     return true;
   }
 
-  const notionLastEditedTime = await fetchLastEditedTime();
+  const pages = await fetchSharedPages();
 
-  return notionLastEditedTime !== localLastEditedTime;
+  for (const page of pages) {
+    const notionLastEditedTime = await fetchLastEditedTime(page.id);
+
+    const wasModified =
+      !(page.id in localLastEditedTimes) ||
+      notionLastEditedTime !== localLastEditedTimes[page.id];
+
+    if (wasModified) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
-async function deploy(): Promise<void> {
-  const didReset = tryResetWorkspace();
+async function deploy(pages: PageObjectResponse[]): Promise<void> {
+  const logger = getOrSetLogger();
 
-  if (didReset) {
-    console.log("Reset workspace.");
-  }
+  // TODO: Show a list of the modified pages' titles.
+  logger.info(`Deploying ${pages.length} modified page(s).`);
 
-  emptyWorkspace();
+  tryCleanWorkspace();
 
-  const didInit = await tryInit();
-
-  if (didInit) {
-    console.log("Initialized fresh workspace.");
-  }
-
-  const notionPageId = requireEnvVariable(EnvironmentVariable.NotionPageId);
-
-  // TODO: Make use of page details.
-  const notionPageDetails = await fetchPageDetails(notionPageId);
-
-  const notionPageBlocks = await fetchPageContents(notionPageId);
-  let pageHtmlContents: Html = "";
-
-  for (const block of notionPageBlocks) {
-    if (!isBlockObjectResponse(block)) {
-      continue;
-    }
-
-    pageHtmlContents += transformBlockToHtml(block);
-  }
-
-  const page = renderTemplate<PageTemplateReplacements>(HtmlTemplate.Page, {
-    content: pageHtmlContents,
-  });
-
-  const css = loadStylesheet();
-
-  const layout = renderTemplate<LayoutTemplateReplacements>(
-    HtmlTemplate.Layout,
-    {
-      // TODO: Extract page title from Notion page details.
-      title: "Blog post",
-      page,
-      css,
-    }
+  assert(
+    await tryInitializeWorkspace(),
+    "Workspace should be successfully initialized after cleaning."
   );
 
   // TODO: Need to have a sitemap be the index file, and then create a new file for each blog post.
-  // TODO: Need to validate both HTML and CSS, likely will need to use a library for that.
 
-  writeWorkspaceFile("index.html", layout);
-  console.log("Wrote workspace index file.");
+  for (const page of pages) {
+    const renderedPage = await renderPage(page);
+
+    // TODO: Need to validate both HTML and CSS, likely will need to use a library for that.
+
+    const filename = `${convertTitleToFilename(renderedPage.title)}.html`;
+
+    writeWorkspaceFile(filename, renderedPage.html);
+    logger.info(`Wrote: ${filename}.`);
+  }
+
   stageCommitAndPush();
-  console.log("Published changes to GitHub.");
+  logger.info("Published changes to GitHub.");
 }
 
-async function checkAndDeploy(): Promise<void> {
+async function deployModifiedPages(): Promise<void> {
   // If there are no changes, do nothing.
   if (!(await checkForChanges())) {
-    console.log("No changes detected.");
-
     return;
   }
 
-  const notionLastEditedTime = await fetchLastEditedTime();
+  const pages = await fetchSharedPages();
+  const lastEditedTimes = await getLocalLastEditedTimes();
 
-  console.log("Changes detected; re-deploying...");
-  deploy();
-  updateLocalLastEditedTime(notionLastEditedTime);
+  const modifiedPages = pages.filter(
+    (page) =>
+      lastEditedTimes === null ||
+      !(page.id in lastEditedTimes) ||
+      page.last_edited_time !== lastEditedTimes[page.id]
+  );
+
+  await deploy(modifiedPages);
+  await updateLocalLastEditedTimes(modifiedPages);
 }
 
 // Check for changes every X milliseconds (based in the
 // `.env` environment variable).
 setInterval(
-  () => checkAndDeploy(),
+  () => deployModifiedPages(),
   parseInt(requireEnvVariable(EnvironmentVariable.CheckInterval))
 );
 
-// Initial check when the script is first run.
-checkAndDeploy();
+// Entry point.
+(async () => {
+  const checkInterval = parseInt(
+    requireEnvVariable(EnvironmentVariable.CheckInterval)
+  );
+
+  // 5 minutes.
+  const MINIMUM_SUGGESTED_CHECK_INTERVAL = 1000 * 60 * 5;
+
+  if (checkInterval < MINIMUM_SUGGESTED_CHECK_INTERVAL) {
+    getOrSetLogger().warn(
+      `Check interval is set to ${checkInterval}ms, which is less than the minimum recommended value of ${MINIMUM_SUGGESTED_CHECK_INTERVAL}ms.`
+    );
+  }
+
+  // Initial deployment attempt when the script is first run.
+  await deployModifiedPages();
+})();

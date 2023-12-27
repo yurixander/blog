@@ -1,6 +1,6 @@
 node_modules/
 .env
 dist/
-lastEditedTime
+lastEditedTime.json
 .workspace
 index.html

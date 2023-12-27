@@ -1,19 +1,31 @@
 import {
   BlockObjectResponse,
+  PageObjectResponse,
   RichTextItemResponse,
 } from "@notionhq/client/build/src/api-endpoints.js";
-import { Html, todo, transformToHtmlString } from "./util.js";
+import {
+  Html,
+  isBlockObjectResponse,
+  todo,
+  transformToHtmlString,
+} from "./util.js";
 import fs from "fs";
 import {
   LayoutTemplateReplacements,
   PageTemplateReplacements,
 } from "./index.js";
 import handlebars from "handlebars";
+import { fetchPageContents } from "./notionApi.js";
 
 export enum HtmlTemplate {
   Layout = "layout",
   Page = "page",
 }
+
+export type RenderedPage = {
+  title: string;
+  html: Html;
+};
 
 export function createHtmlElement(tag: string, contents: Html): Html {
   return `<${tag}>${contents}</${tag}>`;
@@ -25,7 +37,7 @@ export function transformRichTextToHtml(richText: RichTextItemResponse): Html {
   }
 
   // TODO: Process other types of rich text.
-  console.log(richText);
+  console.debug(richText);
   todo();
 }
 
@@ -41,7 +53,7 @@ export function transformBlockToHtml(block: BlockObjectResponse): Html {
     return createHtmlElement("p", contents);
   }
 
-  console.log(block);
+  console.debug(block);
 
   // TODO: Implement.
   todo();
@@ -58,6 +70,41 @@ export function renderTemplate<
 }
 
 export function loadStylesheet(): Html {
-  // TODO: Use PostCSS package to programatically process CSS, along with some plugins like autoprefixer, and minify.
+  // TODO: Use PostCSS package to programmatically process CSS, along with some plugins like autoprefixer, and minify.
   return fs.readFileSync("style.css", "utf-8");
+}
+
+export async function renderPage(
+  page: PageObjectResponse
+): Promise<RenderedPage> {
+  const blocks = await fetchPageContents(page.id);
+  let pageHtmlContents: Html = "";
+
+  for (const block of blocks) {
+    if (!isBlockObjectResponse(block)) {
+      continue;
+    }
+
+    pageHtmlContents += transformBlockToHtml(block);
+  }
+
+  const pageHtml = renderTemplate<PageTemplateReplacements>(HtmlTemplate.Page, {
+    content: pageHtmlContents,
+  });
+
+  const css = loadStylesheet();
+
+  // TODO: Extract page title from page.
+  const title = "Blog post" + Date.now();
+
+  const html = renderTemplate<LayoutTemplateReplacements>(HtmlTemplate.Layout, {
+    title,
+    page: pageHtml,
+    css,
+  });
+
+  return {
+    title,
+    html,
+  };
 }
