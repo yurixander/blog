@@ -22,7 +22,7 @@ export function getOrSetNotionClient(): Client {
 
 export async function fetchPageContents(
   pageId: string
-): Promise<(PartialBlockObjectResponse | BlockObjectResponse)[]> {
+): Promise<Array<PartialBlockObjectResponse | BlockObjectResponse>> {
   const response = await getOrSetNotionClient().blocks.children.list({
     block_id: pageId,
     page_size: 50,
@@ -38,6 +38,7 @@ export type ExtendedPageResponse = GetPageResponse & {
 export function fetchPageDetails(
   pageId: string
 ): Promise<ExtendedPageResponse> {
+  // FIXME: This is temporary.
   return getOrSetNotionClient().pages.retrieve({ page_id: pageId }) as any;
 }
 

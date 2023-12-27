@@ -1,0 +1,13 @@
+:root {
+  --gap-blocks: 1rem;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-blocks);
+}
+
+p {
+  margin: 0;
+}
