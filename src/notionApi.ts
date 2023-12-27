@@ -1,9 +1,14 @@
 import { Client } from "@notionhq/client";
-import { EnvironmentVariable, requireEnvVariable } from "./util.js";
+import {
+  EnvironmentVariable,
+  isPageObjectResponse,
+  requireEnvVariable,
+} from "./util.js";
 import {
   PartialBlockObjectResponse,
   BlockObjectResponse,
   GetPageResponse,
+  PageObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints.js";
 
 let notionSingleton: Client | null = null;
@@ -42,10 +47,32 @@ export function fetchPageDetails(
   return getOrSetNotionClient().pages.retrieve({ page_id: pageId }) as any;
 }
 
-export async function fetchLastEditedTime(): Promise<string> {
-  const pageDetails = await fetchPageDetails(
-    requireEnvVariable(EnvironmentVariable.NotionPageId)
-  );
+export async function fetchLastEditedTime(pageId: string): Promise<string> {
+  const pageDetails = await fetchPageDetails(pageId);
 
   return pageDetails.last_edited_time;
+}
+
+export async function fetchSharedPages(): Promise<PageObjectResponse[]> {
+  const response = await getOrSetNotionClient().search({
+    query: "",
+    sort: {
+      direction: "descending",
+      timestamp: "last_edited_time",
+    },
+    filter: {
+      value: "page",
+      property: "object",
+    },
+  });
+
+  const pages: PageObjectResponse[] = [];
+
+  for (const result of response.results) {
+    if (isPageObjectResponse(result)) {
+      pages.push(result);
+    }
+  }
+
+  return pages;
 }
