@@ -3,7 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{title}</title>
+    <title>{{title}}</title>
+
+    <!-- Global CSS -->
     <style>
       * {
         box-sizing: border-box;
@@ -26,9 +28,14 @@
         background-color: #191919;
       }
     </style>
-    <link rel="stylesheet" href="..//notion.css" />
+
+    <!-- Injected CSS -->
+    <style>
+      /* REVIEW: Perhaps using a file instead would be best for SEO, since CSS styling files can be cached? */
+      {{css}}
+    </style>
   </head>
   <body>
-    {page}
+    {{{page}}}
   </body>
 </html>

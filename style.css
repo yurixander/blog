@@ -8,13 +8,11 @@ main {
   gap: var(--gap-blocks);
 }
 
-
 body {
   background-color: rgb(36, 36, 36);
 }
 
 p {
-  color: white;
   font-family: sans-serif;
   font-size: 16px;
 }
@@ -28,13 +26,11 @@ h1 {
 h2 {
   font-size: 24px;
   font-family: sans-serif;
-  color: white;
 }
 
 h3 {
   font-size: 20px;
   font-family: sans-serif;
-  color: white;
 }
 
 ul {
@@ -45,7 +41,6 @@ ul {
 li {
   font-family: sans-serif;
   font-size: 16px;
-  color: white;
 }
 
 ol {

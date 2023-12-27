@@ -4,28 +4,35 @@ import {
   fetchPageContents,
   fetchPageDetails,
 } from "./notionApi.js";
-import { EnvironmentVariable, requireEnvVariable } from "./util.js";
-import fs from "fs";
-import path from "path";
-import { tryInit, tryPull } from "./git.js";
-import handlebars from "handlebars";
 import {
-  BlockObjectResponse,
-  PartialBlockObjectResponse,
-} from "@notionhq/client/build/src/api-endpoints.js";
-
-enum Template {
-  Layout = "layout",
-  Page = "page",
-}
+  EnvironmentVariable,
+  Html,
+  isBlockObjectResponse,
+  requireEnvVariable,
+} from "./util.js";
+import fs from "fs";
+import {
+  emptyWorkspace,
+  stageCommitAndPush,
+  tryInit,
+  tryResetWorkspace,
+  writeWorkspaceFile,
+} from "./workspace.js";
+import {
+  HtmlTemplate,
+  loadStylesheet,
+  renderTemplate,
+  transformBlockToHtml,
+} from "./html.js";
 
 export type LayoutTemplateReplacements = {
   title: string;
-  page: string;
+  page: Html;
+  css: string;
 };
 
 export type PageTemplateReplacements = {
-  content: string;
+  content: Html;
 };
 
 // Load environment variables from `.env` file.
@@ -65,69 +72,60 @@ async function checkForChanges(): Promise<boolean> {
   return notionLastEditedTime !== localLastEditedTime;
 }
 
-function transformNotionBlocksToHtml(
-  pageContents: Array<PartialBlockObjectResponse | BlockObjectResponse>
-): string {
-  // TODO: Implement.
-  throw new Error("Not yet implemented");
-}
-
 async function deploy(): Promise<void> {
+  const didReset = tryResetWorkspace();
+
+  if (didReset) {
+    console.log("Reset workspace.");
+  }
+
+  emptyWorkspace();
+
   const didInit = await tryInit();
 
   if (didInit) {
-    console.log("Initialized virtual Git repository.");
-  }
-
-  const didPull = await tryPull();
-
-  if (didPull) {
-    console.log(
-      "Pulled changes from remote Git repository. Manual intervention may have occurred."
-    );
+    console.log("Initialized fresh workspace.");
   }
 
   const notionPageId = requireEnvVariable(EnvironmentVariable.NotionPageId);
+
+  // TODO: Make use of page details.
   const notionPageDetails = await fetchPageDetails(notionPageId);
-  const notionPageContents = await fetchPageContents(notionPageId);
 
-  // TODO: Transform Notion blocks into corresponding HTML.
-  const notionContentsAsHtml = transformNotionBlocksToHtml(notionPageContents);
+  const notionPageBlocks = await fetchPageContents(notionPageId);
+  let pageHtmlContents: Html = "";
 
-  const page = renderTemplate<PageTemplateReplacements>(Template.Page, {
-    content: notionContentsAsHtml,
+  for (const block of notionPageBlocks) {
+    if (!isBlockObjectResponse(block)) {
+      continue;
+    }
+
+    pageHtmlContents += transformBlockToHtml(block);
+  }
+
+  const page = renderTemplate<PageTemplateReplacements>(HtmlTemplate.Page, {
+    content: pageHtmlContents,
   });
 
-  const layout = renderTemplate<LayoutTemplateReplacements>(Template.Layout, {
-    // TODO: Extract page title from Notion page details.
-    title: "Blog post",
-    page,
-  });
+  const css = loadStylesheet();
 
-  // TODO: Need to have a sitemap be the index file, and then create a new file for each blog post.
-  writeVirtualFile("index.html", layout);
-
-  // TODO: Deploy by pushing to GitHub's `pages` branch.
-}
-
-async function writeVirtualFile(
-  subPath: string,
-  contents: string
-): Promise<void> {
-  const basePath = requireEnvVariable(EnvironmentVariable.GithubVirtualPath);
-  const fullPath = path.join(basePath, subPath);
-
-  return fs.promises.writeFile(fullPath, contents, { encoding: "utf8" });
-}
-
-function renderTemplate<
-  T extends LayoutTemplateReplacements | PageTemplateReplacements
->(name: Template, replacements: T): string {
-  const template = handlebars.compile(
-    fs.readFileSync(`templates/${name}.html`, "utf-8")
+  const layout = renderTemplate<LayoutTemplateReplacements>(
+    HtmlTemplate.Layout,
+    {
+      // TODO: Extract page title from Notion page details.
+      title: "Blog post",
+      page,
+      css,
+    }
   );
 
-  return template(replacements);
+  // TODO: Need to have a sitemap be the index file, and then create a new file for each blog post.
+  // TODO: Need to validate both HTML and CSS, likely will need to use a library for that.
+
+  writeWorkspaceFile("index.html", layout);
+  console.log("Wrote workspace index file.");
+  stageCommitAndPush();
+  console.log("Published changes to GitHub.");
 }
 
 async function checkAndDeploy(): Promise<void> {
@@ -140,9 +138,9 @@ async function checkAndDeploy(): Promise<void> {
 
   const notionLastEditedTime = await fetchLastEditedTime();
 
-  updateLocalLastEditedTime(notionLastEditedTime);
   console.log("Changes detected; re-deploying...");
   deploy();
+  updateLocalLastEditedTime(notionLastEditedTime);
 }
 
 // Check for changes every X milliseconds (based in the
