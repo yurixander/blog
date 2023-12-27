@@ -30,12 +30,14 @@ export function transformRichTextToHtml(richText: RichTextItemResponse): Html {
 }
 
 export function transformBlockToHtml(block: BlockObjectResponse): Html {
+
+  console.log(block);
+
   if (block.type === "paragraph") {
     const contents = transformToHtmlString(
       transformRichTextToHtml,
       block.paragraph.rich_text
     );
-
     return createHtmlElement("p", contents);
   }
 
