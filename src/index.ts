@@ -3,16 +3,16 @@ import { fetchLastEditedTime, fetchSharedPages } from "./notionApi.js";
 import {
   EnvironmentVariable,
   Html,
+  assert,
   convertTitleToFilename,
   getOrSetLogger,
   requireEnvVariable,
 } from "./util.js";
 import fs from "fs";
 import {
-  emptyWorkspace,
   stageCommitAndPush,
-  tryInit,
-  tryResetWorkspace,
+  tryInitializeWorkspace,
+  tryCleanWorkspace,
   writeWorkspaceFile,
 } from "./workspace.js";
 import { renderPage } from "./html.js";
@@ -93,20 +93,17 @@ async function checkForChanges(): Promise<boolean> {
 }
 
 async function deploy(pages: PageObjectResponse[]): Promise<void> {
-  const didReset = tryResetWorkspace();
   const logger = getOrSetLogger();
 
-  if (didReset) {
-    logger.info("Reset workspace.");
-  }
+  // TODO: Show a list of the modified pages' titles.
+  logger.info(`Deploying ${pages.length} modified page(s).`);
 
-  emptyWorkspace();
+  tryCleanWorkspace();
 
-  const didInit = await tryInit();
-
-  if (didInit) {
-    logger.info("Initialized fresh workspace.");
-  }
+  assert(
+    await tryInitializeWorkspace(),
+    "Workspace should be successfully initialized after cleaning."
+  );
 
   // TODO: Need to have a sitemap be the index file, and then create a new file for each blog post.
 
@@ -126,12 +123,8 @@ async function deploy(pages: PageObjectResponse[]): Promise<void> {
 }
 
 async function deployModifiedPages(): Promise<void> {
-  const logger = getOrSetLogger();
-
   // If there are no changes, do nothing.
   if (!(await checkForChanges())) {
-    logger.info("No changes detected.");
-
     return;
   }
 
