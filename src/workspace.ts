@@ -2,6 +2,7 @@ import { SimpleGit, simpleGit } from "simple-git";
 import { EnvironmentVariable, requireEnvVariable } from "./util.js";
 import fs from "fs";
 import path from "path";
+import dayjs from "dayjs";
 
 let gitSingleton: SimpleGit | null = null;
 
@@ -71,7 +72,10 @@ export async function stageCommitAndPush(): Promise<void> {
   const git = getOrSetGit();
 
   await git.add("-A");
-  await git.commit(Date.now().toLocaleString());
+
+  // TODO: In the future, use a more descriptive commit message. Perhaps base it on what page(s) were updated.
+  await git.commit(dayjs().format());
+
   await git.push();
 }
 

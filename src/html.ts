@@ -56,5 +56,6 @@ export function renderTemplate<
 }
 
 export function loadStylesheet(): Html {
+  // TODO: Use PostCSS package to programatically process CSS, along with some plugins like autoprefixer, and minify.
   return fs.readFileSync("style.css", "utf-8");
 }
