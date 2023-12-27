@@ -18,7 +18,7 @@ function getOrSetGit(): SimpleGit {
   return gitSingleton;
 }
 
-export async function tryInit(): Promise<boolean> {
+export async function tryInitializeWorkspace(): Promise<boolean> {
   const workspacePath = requireEnvVariable(EnvironmentVariable.WorkspacePath);
 
   if (fs.existsSync(workspacePath)) {
@@ -56,7 +56,7 @@ export async function tryInit(): Promise<boolean> {
   return true;
 }
 
-export function tryResetWorkspace(): boolean {
+export function tryCleanWorkspace(): boolean {
   const workspacePath = requireEnvVariable(EnvironmentVariable.WorkspacePath);
 
   if (!fs.existsSync(workspacePath)) {
@@ -77,24 +77,6 @@ export async function stageCommitAndPush(): Promise<void> {
   await git.commit(dayjs().format());
 
   await git.push();
-}
-
-export function emptyWorkspace(): boolean {
-  const workspacePath = requireEnvVariable(EnvironmentVariable.WorkspacePath);
-
-  if (!fs.existsSync(workspacePath)) {
-    return false;
-  }
-
-  const filesAndDirectories = fs
-    .readdirSync(workspacePath)
-    .filter((fileOrDirectory) => fileOrDirectory !== ".git");
-
-  for (const fileOrDirectory of filesAndDirectories) {
-    fs.rmSync(path.join(workspacePath, fileOrDirectory), { recursive: true });
-  }
-
-  return true;
 }
 
 export async function writeWorkspaceFile(

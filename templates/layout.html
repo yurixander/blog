@@ -27,15 +27,30 @@
         font-family: sans-serif;
         background-color: #191919;
       }
+
+      blockquote {
+        border-left: 2px solid white;
+        font-family: sans-serif;
+        padding: 2px;
+        padding-left: 10px;
+      }
     </style>
 
     <!-- Injected CSS -->
     <style>
       /* REVIEW: Perhaps using a file instead would be best for SEO, since CSS styling files can be cached? */
-      {{css}}
+      /*{{css}}*/
     </style>
   </head>
   <body>
     {{{page}}}
+
+    <blockquote>
+      Esto es un bloque de tipo Quote <br>
+      y aquí hay un salto de línea
+    </blockquote>
+    <code lang="javascript">
+      const htmlText = showdown.markdown(markdownText);
+    </code>
   </body>
 </html>

@@ -4,7 +4,7 @@
   "main": "dist/index.js",
   "repository": "https://github.com/yurixander/blog.git",
   "author": "yurixander <101931215+yurixander@users.noreply.github.com>",
-  "license": "MIT",
+  "license": "Custom",
   "private": true,
   "type": "module",
   "scripts": {
@@ -16,7 +16,9 @@
     "dayjs": "^1.11.10",
     "dotenv": "^16.3.1",
     "handlebars": "^4.7.8",
-    "simple-git": "^3.21.0"
+    "moment-timezone": "^0.5.43",
+    "simple-git": "^3.21.0",
+    "winston": "^3.11.0"
   },
   "devDependencies": {
     "typescript": "^5.3.3"

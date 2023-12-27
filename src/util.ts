@@ -1,7 +1,13 @@
 import {
   PartialBlockObjectResponse,
   BlockObjectResponse,
+  PageObjectResponse,
+  DatabaseObjectResponse,
+  PartialDatabaseObjectResponse,
+  PartialPageObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints.js";
+import winston, { Logger } from "winston";
+import moment from "moment-timezone";
 
 export enum EnvironmentVariable {
   CheckInterval = "CHECK_INTERVAL",
@@ -10,13 +16,40 @@ export enum EnvironmentVariable {
   GithubPagesBranchName = "GITHUB_PAGES_BRANCH_NAME",
   WorkspacePath = "WORKSPACE_PATH",
   NotionToken = "NOTION_TOKEN",
-  NotionPageId = "NOTION_PAGE_ID",
   GithubPersonalAccessToken = "GITHUB_PERSONAL_ACCESS_TOKEN",
   GithubUsername = "GITHUB_USERNAME",
   GithubEmail = "GITHUB_EMAIL",
+  LoggerTimezone = "LOGGER_TIMEZONE",
 }
 
 export type Html = string;
+
+let loggerSingleton: Logger | null = null;
+
+export function getOrSetLogger(): Logger {
+  if (loggerSingleton === null) {
+    const loggerTimezone = requireEnvVariable(
+      EnvironmentVariable.LoggerTimezone
+    );
+
+    loggerSingleton = winston.createLogger({
+      level: "info",
+      format: winston.format.combine(
+        winston.format.timestamp({
+          format: () =>
+            moment().tz(loggerTimezone).format("YYYY-MM-DD hh:mm:ss A"),
+        }),
+        winston.format.colorize(),
+        winston.format.printf(
+          (info) => `${info.timestamp} ${info.level}: ${info.message}`
+        )
+      ),
+      transports: [new winston.transports.Console()],
+    });
+  }
+
+  return loggerSingleton;
+}
 
 export function requireEnvVariable(name: EnvironmentVariable): string {
   const variable = process.env[name];
@@ -54,7 +87,31 @@ export function isBlockObjectResponse(
   return (block as BlockObjectResponse).type !== undefined;
 }
 
+export function isPageObjectResponse(
+  page:
+    | PageObjectResponse
+    | PartialPageObjectResponse
+    | PartialDatabaseObjectResponse
+    | DatabaseObjectResponse
+): page is PageObjectResponse {
+  // TODO: This doesn't differentiate between partial page and page.
+  return page.object === "page";
+}
+
 export async function notify(message: string): Promise<void> {
   // TODO: Trigger webhook and notify.
   todo();
+}
+
+export function convertTitleToFilename(string: string): string {
+  return (
+    string
+      .toLowerCase()
+      // Replace any non-alphanumeric character with a hyphen
+      .replace(/[^a-z0-9]/g, "-")
+      // Replace multiple hyphens with a single hyphen
+      .replace(/-+/g, "-")
+      // Trim leading and trailing hyphens
+      .replace(/^-*|-*$/g, "")
+  );
 }
