@@ -137,12 +137,18 @@ export function transformBlockToHtml(block: BlockObjectResponse): Html {
     );
 
     if (block.image.type === "external"){
-      console.log(createHtmlElement("img", contents, `src="${block.image.external.url}"`))
-      return createHtmlElement("img", contents, `src="${block.image.external}"`)
+      const image = createHtmlElement("img", "", `src="${block.image.external.url}"`)
+      const caption = createHtmlElement("p", contents)
+      const container = createHtmlElement("div", `${image}${caption}`)
+      console.log(container)
+      return image
     }
     if (block.image.type === "file"){
-      console.log(createHtmlElement("img", contents, `src="${block.image.file.url}"`))
-      return createHtmlElement("img", contents, `src="${block.image.file.url}"`)
+      const image = createHtmlElement("img", "", `src="${block.image.file.url}"`)
+      const caption = createHtmlElement("p", contents)
+      const container = createHtmlElement("div", `${image}${caption}`)
+      console.log(container)
+      return image
     }
 
     return createHtmlElement("img", contents);
