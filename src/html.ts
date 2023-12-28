@@ -12,7 +12,7 @@ import {
 import fs from "fs";
 import {
   LayoutTemplateReplacements,
-  PageTemplateReplacements,
+  PageTemplateReplacements
 } from "./index.js";
 import handlebars from "handlebars";
 import { fetchPageContents } from "./notionApi.js";
@@ -31,19 +31,36 @@ export function createHtmlElement(tag: string, contents: Html): Html {
   return `<${tag}>${contents}</${tag}>`;
 }
 
-export function transformRichTextToHtml(richText: RichTextItemResponse): Html {
-  if (richText.type === "text") {
-    return richText.text.content;
+function createHtmlElementList(tags: string[], content: Html): string {
+  const formattedTags = [content];
+
+  for (const tag of tags) {
+    formattedTags.unshift(`<${tag}>`);
+    formattedTags.push(`</${tag}>`);
   }
 
+  return formattedTags.join("");
+}
+
+export function transformRichTextToHtml(richText: RichTextItemResponse): Html {
+  const listTag: string[] = ["p"]
+
+  if (richText.type === "text") {
+    if (richText.annotations.bold) listTag.unshift("b")
+    if (richText.annotations.italic) listTag.unshift("i")
+    if (richText.annotations.underline) listTag.unshift("u")
+    if (richText.annotations.strikethrough) listTag.unshift("del")
+
+    const text = createHtmlElementList(listTag, richText.text.content)
+    console.log(text)
+    return text;
+  }
   // TODO: Process other types of rich text.
   console.debug(richText);
   todo();
 }
 
 export function transformBlockToHtml(block: BlockObjectResponse): Html {
-
-  console.log(block);
 
   if (block.type === "paragraph") {
     const contents = transformToHtmlString(

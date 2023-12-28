@@ -47,3 +47,10 @@ ol {
   display: flex;
   flex-direction: column;
 }
+
+blockquote {
+  border-left: 2px solid white;
+  font-family: sans-serif;
+  padding: 2px;
+  padding-left: 10px;
+}
