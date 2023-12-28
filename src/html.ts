@@ -1,5 +1,6 @@
 import {
   BlockObjectResponse,
+  Heading1BlockObjectResponse,
   PageObjectResponse,
   RichTextItemResponse,
 } from "@notionhq/client/build/src/api-endpoints.js";
@@ -43,7 +44,7 @@ function createHtmlElementList(tags: string[], content: Html): string {
 }
 
 export function transformRichTextToHtml(richText: RichTextItemResponse): Html {
-  const listTag: string[] = ["p"]
+  const listTag: string[] = []
 
   if (richText.type === "text") {
     if (richText.annotations.bold) listTag.unshift("b")
@@ -52,7 +53,6 @@ export function transformRichTextToHtml(richText: RichTextItemResponse): Html {
     if (richText.annotations.strikethrough) listTag.unshift("del")
 
     const text = createHtmlElementList(listTag, richText.text.content)
-    console.log(text)
     return text;
   }
   // TODO: Process other types of rich text.
@@ -61,13 +61,68 @@ export function transformRichTextToHtml(richText: RichTextItemResponse): Html {
 }
 
 export function transformBlockToHtml(block: BlockObjectResponse): Html {
-
   if (block.type === "paragraph") {
     const contents = transformToHtmlString(
       transformRichTextToHtml,
       block.paragraph.rich_text
     );
     return createHtmlElement("p", contents);
+  }
+  if (block.type === "heading_1") {
+    const contents = transformToHtmlString(
+      transformRichTextToHtml,
+      block.heading_1.rich_text
+    );
+    const tag = block.heading_1.is_toggleable ? "toggle" : "h1"
+    console.log(createHtmlElement(tag, contents))
+    return createHtmlElement(tag, contents);
+  }
+  if (block.type === "heading_2") {
+    const contents = transformToHtmlString(
+      transformRichTextToHtml,
+      block.heading_2.rich_text
+    );
+    const tag = block.heading_2.is_toggleable ? "toggle" : "h2"
+    console.log(createHtmlElement(tag, contents))
+    return createHtmlElement(tag, contents);
+  }
+  if (block.type === "heading_3") {
+    const contents = transformToHtmlString(
+      transformRichTextToHtml,
+      block.heading_3.rich_text
+    );
+    const tag = block.heading_3.is_toggleable ? "toggle" : "h3"
+    console.log(createHtmlElement(tag, contents))
+    return createHtmlElement(tag, contents);
+  }
+  if (block.type === "bulleted_list_item") {
+    const contents = transformToHtmlString(
+      transformRichTextToHtml,
+      block.bulleted_list_item.rich_text
+    );
+    console.log(createHtmlElement("li", contents))
+    return createHtmlElement("li", contents);
+  }
+  if (block.type === "quote") {
+    const contents = transformToHtmlString(
+      transformRichTextToHtml,
+      block.quote.rich_text
+    );
+    console.log(createHtmlElement("blockquote", contents))
+    return createHtmlElement("blockquote", contents);
+  }
+  if (block.type === "numbered_list_item") {
+    const contents = transformToHtmlString(
+      transformRichTextToHtml,
+      block.numbered_list_item.rich_text
+    );
+    console.log(createHtmlElement("li", contents))
+    return createHtmlElement("li", contents);
+    /*Output
+    <li>Testing</li>
+    <li>Improve</li>
+    */
+   // TODO: This output should be encapsulated with <ol>
   }
 
   console.debug(block);
