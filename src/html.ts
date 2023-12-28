@@ -28,8 +28,8 @@ export type RenderedPage = {
   html: Html;
 };
 
-export function createHtmlElement(tag: string, contents: Html): Html {
-  return `<${tag}>${contents}</${tag}>`;
+export function createHtmlElement(tag: string, contents: Html, args?: string): Html {
+  return `<${tag}${args !== undefined ? ` ${args}` : ""}>${contents}</${tag}>`;
 }
 
 function createHtmlElementList(tags: string[], content: Html): string {
@@ -55,6 +55,8 @@ export function transformRichTextToHtml(richText: RichTextItemResponse): Html {
     const text = createHtmlElementList(listTag, richText.text.content)
     return text;
   }
+  // TODO: Process color for text
+  // TODO: Handle href
   // TODO: Process other types of rich text.
   console.debug(richText);
   todo();
@@ -123,6 +125,27 @@ export function transformBlockToHtml(block: BlockObjectResponse): Html {
     <li>Improve</li>
     */
    // TODO: This output should be encapsulated with <ol>
+  }
+  if (block.type === "divider") {
+    console.log(createHtmlElement("hr", ""))
+    return createHtmlElement("hr", "");
+  }
+  if (block.type === "image") {
+    const contents = transformToHtmlString(
+      transformRichTextToHtml,
+      block.image.caption
+    );
+
+    if (block.image.type === "external"){
+      console.log(createHtmlElement("img", contents, `src="${block.image.external.url}"`))
+      return createHtmlElement("img", contents, `src="${block.image.external}"`)
+    }
+    if (block.image.type === "file"){
+      console.log(createHtmlElement("img", contents, `src="${block.image.file.url}"`))
+      return createHtmlElement("img", contents, `src="${block.image.file.url}"`)
+    }
+
+    return createHtmlElement("img", contents);
   }
 
   console.debug(block);
