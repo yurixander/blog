@@ -45,7 +45,7 @@ p, li, details, details p {
   max-width: 100%;
 }
 h1 {
-   margin-left: 15px;
+  margin-left: 15px;
   font-size: var(--font-size-h1);
 }
 
@@ -88,14 +88,6 @@ span span {
 
 span strong {
   font-weight: bold;
-}
-
-img {
-  max-width: var(--max-img-width-large);
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  height: auto;
 }
 
 @media (max-width: 768px) {

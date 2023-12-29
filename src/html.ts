@@ -44,17 +44,18 @@ function createHtmlElementList(tags: string[], content: Html): string {
 
 export function transformRichTextToHtml(richText: RichTextItemResponse): Html {
   const listTag: string[] = []
+  let args: string | undefined
 
   if (richText.type === "text") {
     if (richText.annotations.bold) listTag.unshift("b")
     if (richText.annotations.italic) listTag.unshift("i")
     if (richText.annotations.underline) listTag.unshift("u")
     if (richText.annotations.strikethrough) listTag.unshift("del")
+    if (richText.annotations.color !== "default") args =`style="color: ${richText.annotations.color};"`
 
     const text = createHtmlElementList(listTag, richText.text.content)
-    return text;
+    return createHtmlElement("span", text, args);
   }
-  // TODO: Process color for text
   // TODO: Handle href
   // TODO: Process other types of rich text.
   console.debug(richText);
@@ -112,8 +113,9 @@ export function transformBlockToHtml(block: BlockObjectResponse): Html {
       transformRichTextToHtml,
       block.numbered_list_item.rich_text
     );
-    console.log(createHtmlElement("li", contents))
-    return createHtmlElement("li", contents);
+    const item = createHtmlElement("li", contents);
+    const container = createHtmlElement("ol", item);
+    return container;
     /*Output
     <li>Testing</li>
     <li>Improve</li>
@@ -123,6 +125,20 @@ export function transformBlockToHtml(block: BlockObjectResponse): Html {
   if (block.type === "divider") {
     console.log(createHtmlElement("hr", ""))
     return createHtmlElement("hr", "");
+  }
+  if (block.type === "to_do") {
+    const isChecked = block.to_do.checked ? "checked" : "";
+    const textTag = isChecked ? "del" : "p"
+
+    const caption = transformToHtmlString(
+      transformRichTextToHtml,
+      block.to_do.rich_text
+    );
+
+    const checkbox = createHtmlElement("input", "", `type="checkbox" ${isChecked} disabled="true"`)
+    const text = createHtmlElement(textTag, caption)
+    const checkboxContainer = createHtmlElement("div", `${checkbox}${text}`, `class="checkbox-container"`)
+    return checkboxContainer;
   }
   if (block.type === "image") {
     const contents = transformToHtmlString(
@@ -145,6 +161,24 @@ export function transformBlockToHtml(block: BlockObjectResponse): Html {
 
     return createHtmlElement("img", contents);
   }
+
+  if (block.type === "callout") {
+    const richText = transformToHtmlString(
+      transformRichTextToHtml,
+      block.callout.rich_text
+    );
+
+    let iconSrc = ""
+    if (block.callout.icon?.type === "external") iconSrc = block.callout.icon.external.url;
+    if (block.callout.icon?.type === "emoji") iconSrc = block.callout.icon.emoji
+    if (block.callout.icon?.type === "file") iconSrc = block.callout.icon.file.url
+
+    const icon = createHtmlElement("img", "", `class="icon" src="${iconSrc}"`)
+    const text = createHtmlElement("p", richText)
+    const container = createHtmlElement("div", `${icon}${text}`, `class="callout"`)
+    return container
+  }
+
   console.debug(block);
 
   // TODO: Implement.
@@ -172,14 +206,6 @@ export async function renderPage(
   const blocks = await fetchPageContents(page.id);
   let pageHtmlContents: Html = "";
 
-  if (page.properties.title.type === "title"){
-    // TODO: Handle here page title
-    let htmlTitle = ""
-    page.properties.title.title.forEach((title) => {
-      htmlTitle += transformRichTextToHtml(title);
-    })
-  }
-
   for (const block of blocks) {
     if (!isBlockObjectResponse(block)) {
       continue;
@@ -193,8 +219,13 @@ export async function renderPage(
   });
   const css = loadStylesheet();
 
-  // TODO: Extract page title from page.
-  const title = "Blog post" + Date.now();
+  let title = "Blog post" + Date.now();
+
+  if (page.properties.title.type === "title"){
+    page.properties.title.title.forEach((titleProp) => {
+      title = titleProp.plain_text
+    })
+  }
 
   const html = renderTemplate<LayoutTemplateReplacements>(HtmlTemplate.Layout, {
     title,
