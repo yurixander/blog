@@ -41,6 +41,19 @@
       /* REVIEW: Perhaps using a file instead would be best for SEO, since CSS styling files can be cached? */
       :root {
   --gap-blocks: 1rem;
+  --font-size-base: 1rem;
+  --font-size-h1: 1.875rem;
+  --font-size-h2: 1.5rem;
+  --font-size-h3: 1.25rem;
+  --font-size-small: 0.75rem;
+  --font-size-medium: 0.875rem;
+  --padding-default: 16px;
+  --padding-medium: 12px;
+  --padding-small: 8px;
+  --border-radius: 4px;
+  --max-img-width-large: 39.5rem;
+  --max-img-width-medium: 31.25rem;
+  --max-img-width-small: 18.75rem;
 }
 
 main {
@@ -52,6 +65,13 @@ main {
 body {
   background-color: rgb(36, 36, 36);
 }
+li, details, details p {
+  margin-left: 15px;
+  font-size: var(--font-size-base);
+  margin-top: 0;
+  word-wrap: break-word;
+  max-width: 100%;
+}
 
 p {
   font-family: sans-serif;
@@ -60,35 +80,45 @@ p {
   padding: 0;
 }
 
+html {
+  font-size: 16px;
+}
+
 h1 {
-  font-size: 30px;
+  margin-left: 15px;
+  font-size: var(--font-size-h1);
   font-family: sans-serif;
   color: rgb(250, 250, 250);
 }
 
 h2 {
-  font-size: 24px;
+  margin-left: 15px;
+  font-size: var(--font-size-h2);
   font-family: sans-serif;
 }
 
 h3 {
+  margin-left: 15px;
   font-size: 20px;
-  font-family: sans-serif;
+  font-size: var(--font-size-h3);
 }
 
-ul {
-  display: flex;
-  flex-direction: column;
+
+hr {
+  width: 100%;
+  height: 1px;
+  background-color:#ffffff21;
+}
+
+
+ul, ol {
+  list-style-position: inside; /* Show marks or numbers inside of block content */
+  padding-left: 0;
 }
 
 li {
   font-family: sans-serif;
   font-size: 16px;
-}
-
-ol {
-  display: flex;
-  flex-direction: column;
 }
 
 blockquote {
@@ -99,12 +129,52 @@ blockquote {
 }
 
 span {
-  display: flex;
+  background-color: #333;
+  padding: var(--padding-default);
+  border-radius: var(--border-radius);
+  display: block;
+  width: 100%;
+  font-size: var(--font-size-base);
+}
+
+span span {
+  display: inline;
+  padding: 0;
+}
+
+span strong {
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  span {
+    padding: var(--padding-medium);
+    font-size: var(--font-size-medium);
+  }
+
+  img {
+    max-width: var(--max-img-width-medium);
+  }
+}
+
+@media (max-width: 480px) {
+  span {
+    padding: var(--padding-small);
+    font-size: var(--font-size-small);
+  }
+
+  img {
+    max-width: var(--max-img-width-small);
+  }
 }
 
 img {
-  height: 60%;
-  width: 60%;
+  max-width: var(--max-img-width-large);
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  height: auto;
+  object-fit: cover;
 }
 
 .title {
