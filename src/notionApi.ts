@@ -32,6 +32,7 @@ export async function fetchPageContents(
     block_id: pageId,
     page_size: 50,
   });
+  getOrSetNotionClient().pages.properties.retrieve
 
   return response.results;
 }

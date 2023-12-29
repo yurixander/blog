@@ -1,6 +1,5 @@
 import {
   BlockObjectResponse,
-  Heading1BlockObjectResponse,
   PageObjectResponse,
   RichTextItemResponse,
 } from "@notionhq/client/build/src/api-endpoints.js";
@@ -76,7 +75,6 @@ export function transformBlockToHtml(block: BlockObjectResponse): Html {
       block.heading_1.rich_text
     );
     const tag = block.heading_1.is_toggleable ? "toggle" : "h1"
-    console.log(createHtmlElement(tag, contents))
     return createHtmlElement(tag, contents);
   }
   if (block.type === "heading_2") {
@@ -85,7 +83,6 @@ export function transformBlockToHtml(block: BlockObjectResponse): Html {
       block.heading_2.rich_text
     );
     const tag = block.heading_2.is_toggleable ? "toggle" : "h2"
-    console.log(createHtmlElement(tag, contents))
     return createHtmlElement(tag, contents);
   }
   if (block.type === "heading_3") {
@@ -94,7 +91,6 @@ export function transformBlockToHtml(block: BlockObjectResponse): Html {
       block.heading_3.rich_text
     );
     const tag = block.heading_3.is_toggleable ? "toggle" : "h3"
-    console.log(createHtmlElement(tag, contents))
     return createHtmlElement(tag, contents);
   }
   if (block.type === "bulleted_list_item") {
@@ -102,7 +98,6 @@ export function transformBlockToHtml(block: BlockObjectResponse): Html {
       transformRichTextToHtml,
       block.bulleted_list_item.rich_text
     );
-    console.log(createHtmlElement("li", contents))
     return createHtmlElement("li", contents);
   }
   if (block.type === "quote") {
@@ -110,7 +105,6 @@ export function transformBlockToHtml(block: BlockObjectResponse): Html {
       transformRichTextToHtml,
       block.quote.rich_text
     );
-    console.log(createHtmlElement("blockquote", contents))
     return createHtmlElement("blockquote", contents);
   }
   if (block.type === "numbered_list_item") {
@@ -140,20 +134,17 @@ export function transformBlockToHtml(block: BlockObjectResponse): Html {
       const image = createHtmlElement("img", "", `src="${block.image.external.url}"`)
       const caption = createHtmlElement("p", contents)
       const container = createHtmlElement("div", `${image}${caption}`)
-      console.log(container)
-      return image
+      return container
     }
     if (block.image.type === "file"){
       const image = createHtmlElement("img", "", `src="${block.image.file.url}"`)
       const caption = createHtmlElement("p", contents)
       const container = createHtmlElement("div", `${image}${caption}`)
-      console.log(container)
-      return image
+      return container
     }
 
     return createHtmlElement("img", contents);
   }
-
   console.debug(block);
 
   // TODO: Implement.
@@ -181,6 +172,14 @@ export async function renderPage(
   const blocks = await fetchPageContents(page.id);
   let pageHtmlContents: Html = "";
 
+  if (page.properties.title.type === "title"){
+    // TODO: Handle here page title
+    let htmlTitle = ""
+    page.properties.title.title.forEach((title) => {
+      htmlTitle += transformRichTextToHtml(title);
+    })
+  }
+
   for (const block of blocks) {
     if (!isBlockObjectResponse(block)) {
       continue;
@@ -192,7 +191,6 @@ export async function renderPage(
   const pageHtml = renderTemplate<PageTemplateReplacements>(HtmlTemplate.Page, {
     content: pageHtmlContents,
   });
-
   const css = loadStylesheet();
 
   // TODO: Extract page title from page.
