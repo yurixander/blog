@@ -59,6 +59,11 @@ export function transformRichTextToHtml(richText: RichTextItemResponse): Html {
       args = `style="color: ${richText.annotations.color};"`
 
     const text = createHtmlElementList(listTag, richText.text.content)
+
+    if (richText.text.link?.url !== undefined) {
+      return createHtmlElement("a", text, `href="${richText.text.link?.url}"`)
+    }
+
     return createHtmlElement("span", text, args)
   }
   // TODO: Handle href

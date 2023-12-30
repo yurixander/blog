@@ -4,3 +4,5 @@ dist/
 lastEditedTime.json
 .workspace
 index.html
+yarn-error.log
+package-lock.json
