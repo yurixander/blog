@@ -1,28 +1,28 @@
-import { Client } from "@notionhq/client";
+import {Client} from "@notionhq/client"
 import {
   EnvironmentVariable,
   isPageObjectResponse,
   requireEnvVariable,
-} from "./util.js";
+} from "./util.js"
 import {
-  PartialBlockObjectResponse,
-  BlockObjectResponse,
-  GetPageResponse,
-  PageObjectResponse,
-} from "@notionhq/client/build/src/api-endpoints.js";
+  type PartialBlockObjectResponse,
+  type BlockObjectResponse,
+  type GetPageResponse,
+  type PageObjectResponse,
+} from "@notionhq/client/build/src/api-endpoints.js"
 
-let notionSingleton: Client | null = null;
+let notionSingleton: Client | null = null
 
 export function getOrSetNotionClient(): Client {
   if (notionSingleton === null) {
-    const notionToken = requireEnvVariable(EnvironmentVariable.NotionToken);
+    const notionToken = requireEnvVariable(EnvironmentVariable.NotionToken)
 
     notionSingleton = new Client({
       auth: notionToken,
-    });
+    })
   }
 
-  return notionSingleton;
+  return notionSingleton
 }
 
 export async function fetchPageContents(
@@ -31,27 +31,27 @@ export async function fetchPageContents(
   const response = await getOrSetNotionClient().blocks.children.list({
     block_id: pageId,
     page_size: 50,
-  });
+  })
   getOrSetNotionClient().pages.properties.retrieve
 
-  return response.results;
+  return response.results
 }
 
 export type ExtendedPageResponse = GetPageResponse & {
-  last_edited_time: string;
-};
+  last_edited_time: string
+}
 
-export function fetchPageDetails(
+export async function fetchPageDetails(
   pageId: string
 ): Promise<ExtendedPageResponse> {
   // FIXME: This is temporary.
-  return getOrSetNotionClient().pages.retrieve({ page_id: pageId }) as any;
+  return getOrSetNotionClient().pages.retrieve({page_id: pageId}) as any
 }
 
 export async function fetchLastEditedTime(pageId: string): Promise<string> {
-  const pageDetails = await fetchPageDetails(pageId);
+  const pageDetails = await fetchPageDetails(pageId)
 
-  return pageDetails.last_edited_time;
+  return pageDetails.last_edited_time
 }
 
 export async function fetchSharedPages(): Promise<PageObjectResponse[]> {
@@ -65,15 +65,15 @@ export async function fetchSharedPages(): Promise<PageObjectResponse[]> {
       value: "page",
       property: "object",
     },
-  });
+  })
 
-  const pages: PageObjectResponse[] = [];
+  const pages: PageObjectResponse[] = []
 
   for (const result of response.results) {
     if (isPageObjectResponse(result)) {
-      pages.push(result);
+      pages.push(result)
     }
   }
 
-  return pages;
+  return pages
 }

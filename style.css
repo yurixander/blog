@@ -25,7 +25,9 @@ body {
   background-color: rgb(36, 36, 36);
 }
 
-li, details, details p {
+li,
+details,
+details p {
   margin-left: 15px;
   font-size: var(--font-size-base);
   margin-top: 0;
@@ -59,15 +61,14 @@ h3 {
   font-family: sans-serif;
 }
 
-
 hr {
   width: 100%;
   height: 1px;
-  background-color:#ffffff21;
+  background-color: #ffffff21;
 }
 
-
-ul, ol {
+ul,
+ol {
   list-style-position: inside;
   padding-left: 0;
 }
@@ -123,7 +124,7 @@ img {
   border-radius: 5px;
 }
 
-.callout .icon{
+.callout .icon {
   width: 20px;
   height: 20px;
 }
