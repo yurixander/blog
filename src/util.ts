@@ -1,13 +1,13 @@
 import {
-  type PartialBlockObjectResponse,
   type BlockObjectResponse,
-  type PageObjectResponse,
   type DatabaseObjectResponse,
+  type PageObjectResponse,
+  type PartialBlockObjectResponse,
   type PartialDatabaseObjectResponse,
   type PartialPageObjectResponse,
-} from "@notionhq/client/build/src/api-endpoints.js"
-import winston, {type Logger} from "winston"
-import moment from "moment-timezone"
+} from "@notionhq/client/build/src/api-endpoints.js";
+import moment from "moment-timezone";
+import winston, {type Logger} from "winston";
 
 export enum EnvironmentVariable {
   CheckInterval = "CHECK_INTERVAL",
@@ -22,15 +22,15 @@ export enum EnvironmentVariable {
   LoggerTimezone = "LOGGER_TIMEZONE",
 }
 
-export type Html = string
+export type Html = string;
 
-let loggerSingleton: Logger | null = null
+let loggerSingleton: Logger | null = null;
 
 export function getOrSetLogger(): Logger {
   if (loggerSingleton === null) {
     const loggerTimezone = requireEnvVariable(
       EnvironmentVariable.LoggerTimezone
-    )
+    );
 
     loggerSingleton = winston.createLogger({
       level: "info",
@@ -41,35 +41,35 @@ export function getOrSetLogger(): Logger {
         }),
         winston.format.colorize(),
         winston.format.printf(
-          info => `${info.timestamp} ${info.level}: ${info.message}`
+          (info) => `${info.timestamp} ${info.level}: ${info.message}`
         )
       ),
       transports: [new winston.transports.Console()],
-    })
+    });
   }
 
-  return loggerSingleton
+  return loggerSingleton;
 }
 
 export function requireEnvVariable(name: EnvironmentVariable): string {
-  const variable = process.env[name]
+  const variable = process.env[name];
 
   if (variable === undefined) {
-    throw new Error(`Environment variable ${name} is not defined`)
+    throw new Error(`Environment variable ${name} is not defined`);
   }
 
-  return variable
+  return variable;
 }
 
 export function todo(): never {
-  throw new Error("Not implemented")
+  throw new Error("Not implemented");
 }
 
 export function transformToHtmlString<T>(
   transformer: (value: T) => Html,
   values: T[]
 ): Html {
-  return values.map(transformer).join("")
+  return values.map(transformer).join("");
 }
 
 export function assert(
@@ -77,14 +77,14 @@ export function assert(
   reasoning: string
 ): asserts condition {
   if (!condition) {
-    throw new Error(`Assertion failed: ${reasoning}`)
+    throw new Error(`Assertion failed: ${reasoning}`);
   }
 }
 
 export function isBlockObjectResponse(
   block: PartialBlockObjectResponse | BlockObjectResponse
 ): block is BlockObjectResponse {
-  return (block as BlockObjectResponse).type !== undefined
+  return (block as BlockObjectResponse).type !== undefined;
 }
 
 export function isPageObjectResponse(
@@ -95,12 +95,12 @@ export function isPageObjectResponse(
     | DatabaseObjectResponse
 ): page is PageObjectResponse {
   // TODO: This doesn't differentiate between partial page and page.
-  return page.object === "page"
+  return page.object === "page";
 }
 
 export async function notify(message: string): Promise<void> {
   // TODO: Trigger webhook and notify.
-  todo()
+  todo();
 }
 
 export function convertTitleToFilename(string: string): string {
@@ -113,5 +113,5 @@ export function convertTitleToFilename(string: string): string {
       .replace(/-+/g, "-")
       // Trim leading and trailing hyphens
       .replace(/^-*|-*$/g, "")
-  )
+  );
 }

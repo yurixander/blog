@@ -1,90 +1,90 @@
-import {type SimpleGit, simpleGit} from "simple-git"
-import {EnvironmentVariable, requireEnvVariable} from "./util.js"
-import fs from "fs"
-import path from "path"
-import dayjs from "dayjs"
+import dayjs from "dayjs";
+import fs from "fs";
+import path from "path";
+import {simpleGit, type SimpleGit} from "simple-git";
+import {EnvironmentVariable, requireEnvVariable} from "./util.js";
 
-let gitSingleton: SimpleGit | null = null
+let gitSingleton: SimpleGit | null = null;
 
 function getOrSetGit(): SimpleGit {
   if (gitSingleton !== null) {
-    return gitSingleton
+    return gitSingleton;
   }
 
-  const workspacePath = requireEnvVariable(EnvironmentVariable.WorkspacePath)
+  const workspacePath = requireEnvVariable(EnvironmentVariable.WorkspacePath);
 
-  gitSingleton = simpleGit(workspacePath)
+  gitSingleton = simpleGit(workspacePath);
 
-  return gitSingleton
+  return gitSingleton;
 }
 
 export async function tryInitializeWorkspace(): Promise<boolean> {
-  const workspacePath = requireEnvVariable(EnvironmentVariable.WorkspacePath)
+  const workspacePath = requireEnvVariable(EnvironmentVariable.WorkspacePath);
 
   if (fs.existsSync(workspacePath)) {
-    return false
+    return false;
   }
 
-  fs.mkdirSync(workspacePath)
+  fs.mkdirSync(workspacePath);
 
   const githubProjectUrl = requireEnvVariable(
     EnvironmentVariable.GithubProjectUrl
-  )
+  );
 
   const authenticatedGithubProjectUrl = githubProjectUrl.replace(
     "https://",
     `https://${requireEnvVariable(
       EnvironmentVariable.GithubPersonalAccessToken
     )}@`
-  )
+  );
 
   const githubPagesBranchName = requireEnvVariable(
     EnvironmentVariable.GithubPagesBranchName
-  )
+  );
 
-  const git = getOrSetGit()
+  const git = getOrSetGit();
 
-  await git.clone(authenticatedGithubProjectUrl, ".")
-  await git.checkout(githubPagesBranchName)
+  await git.clone(authenticatedGithubProjectUrl, ".");
+  await git.checkout(githubPagesBranchName);
 
-  const githubUsername = requireEnvVariable(EnvironmentVariable.GithubUsername)
-  const githubEmail = requireEnvVariable(EnvironmentVariable.GithubEmail)
+  const githubUsername = requireEnvVariable(EnvironmentVariable.GithubUsername);
+  const githubEmail = requireEnvVariable(EnvironmentVariable.GithubEmail);
 
-  await git.addConfig("user.name", githubUsername, false, "local")
-  await git.addConfig("user.email", githubEmail, false, "local")
+  await git.addConfig("user.name", githubUsername, false, "local");
+  await git.addConfig("user.email", githubEmail, false, "local");
 
-  return true
+  return true;
 }
 
 export function tryCleanWorkspace(): boolean {
-  const workspacePath = requireEnvVariable(EnvironmentVariable.WorkspacePath)
+  const workspacePath = requireEnvVariable(EnvironmentVariable.WorkspacePath);
 
   if (!fs.existsSync(workspacePath)) {
-    return false
+    return false;
   }
 
-  fs.rmSync(workspacePath, {recursive: true})
+  fs.rmSync(workspacePath, {recursive: true});
 
-  return true
+  return true;
 }
 
 export async function stageCommitAndPush(): Promise<void> {
-  const git = getOrSetGit()
+  const git = getOrSetGit();
 
-  await git.add("-A")
+  await git.add("-A");
 
   // TODO: In the future, use a more descriptive commit message. Perhaps base it on what page(s) were updated.
-  await git.commit(dayjs().format())
+  await git.commit(dayjs().format());
 
-  await git.push()
+  await git.push();
 }
 
 export async function writeWorkspaceFile(
   subPath: string,
   contents: string
 ): Promise<void> {
-  const basePath = requireEnvVariable(EnvironmentVariable.WorkspacePath)
-  const fullPath = path.join(basePath, subPath)
+  const basePath = requireEnvVariable(EnvironmentVariable.WorkspacePath);
+  const fullPath = path.join(basePath, subPath);
 
-  return fs.promises.writeFile(fullPath, contents, {encoding: "utf8"})
+  await fs.promises.writeFile(fullPath, contents, {encoding: "utf8"});
 }

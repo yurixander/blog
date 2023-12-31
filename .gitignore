@@ -3,6 +3,5 @@ node_modules/
 dist/
 lastEditedTime.json
 .workspace
-index.html
-yarn-error.log
+*.log
 package-lock.json
