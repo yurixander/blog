@@ -65,13 +65,6 @@ export function todo(): never {
   throw new Error("Not implemented");
 }
 
-export function transformToHtmlString<T>(
-  transformer: (value: T) => Html,
-  values: T[]
-): Html {
-  return values.map(transformer).join("");
-}
-
 export function assert(
   condition: boolean,
   reasoning: string
