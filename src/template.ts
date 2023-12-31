@@ -1,13 +1,19 @@
 import {type PageObjectResponse} from "@notionhq/client/build/src/api-endpoints.js";
 import fs from "fs";
 import handlebars from "handlebars";
-import {
-  type LayoutTemplateReplacements,
-  type PostTemplateReplacements,
-} from "./index.js";
 import {fetchPageContents} from "./notionApi.js";
 import {transformBlockToHtml} from "./transform.js";
 import {isBlockObjectResponse, type Html} from "./util.js";
+
+export type LayoutTemplateReplacements = {
+  title: string;
+  content: Html;
+  css: string;
+};
+
+export type PostTemplateReplacements = {
+  content: Html;
+};
 
 export enum HtmlTemplate {
   Layout = "layout",

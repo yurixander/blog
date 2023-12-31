@@ -9,7 +9,6 @@ import {
   convertTitleToFilename,
   getOrSetLogger,
   requireEnvVariable,
-  type Html,
 } from "./util.js";
 import {
   stageCommitAndPush,
@@ -17,16 +16,6 @@ import {
   tryInitializeWorkspace,
   writeWorkspaceFile,
 } from "./workspace.js";
-
-export type LayoutTemplateReplacements = {
-  title: string;
-  content: Html;
-  css: string;
-};
-
-export type PostTemplateReplacements = {
-  content: Html;
-};
 
 // Load environment variables from `.env` file.
 config();
