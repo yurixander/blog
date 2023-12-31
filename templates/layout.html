@@ -31,7 +31,7 @@
 
     <!-- Injected CSS -->
     <style>
-      /* REVIEW: Perhaps using a file instead would be best for SEO, since CSS styling files can be cached? */
+      /* REVIEW: Perhaps using a file instead would be best for SEO, since CSS styling files can be cached? Including the style inlined could actually degrade load time performance, since the CSS file is no longer loaded asynchronously, but instead directly downloaded along with the page. */
       {{css}}
     </style>
   </head>

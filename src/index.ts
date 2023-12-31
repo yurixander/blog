@@ -20,11 +20,11 @@ import {
 
 export type LayoutTemplateReplacements = {
   title: string;
-  page: Html;
+  content: Html;
   css: string;
 };
 
-export type PageTemplateReplacements = {
+export type PostTemplateReplacements = {
   content: Html;
 };
 
@@ -144,13 +144,12 @@ async function deployModifiedPages(): Promise<void> {
 
 // Check for changes every X milliseconds (based in the
 // `.env` environment variable).
-setInterval(
-  async () => deployModifiedPages(),
-  parseInt(requireEnvVariable(EnvironmentVariable.CheckInterval))
-);
+setInterval(() => {
+  void deployModifiedPages();
+}, parseInt(requireEnvVariable(EnvironmentVariable.CheckInterval)));
 
 // Entry point.
-(async () => {
+(() => {
   const checkInterval = parseInt(
     requireEnvVariable(EnvironmentVariable.CheckInterval)
   );
@@ -165,5 +164,5 @@ setInterval(
   }
 
   // Initial deployment attempt when the script is first run.
-  await deployModifiedPages();
+  void deployModifiedPages();
 })();

@@ -3,7 +3,7 @@ import fs from "fs";
 import handlebars from "handlebars";
 import {
   type LayoutTemplateReplacements,
-  type PageTemplateReplacements,
+  type PostTemplateReplacements,
 } from "./index.js";
 import {fetchPageContents} from "./notionApi.js";
 import {transformBlockToHtml} from "./transform.js";
@@ -28,7 +28,7 @@ export function createHtmlElement(
 }
 
 export function renderTemplate<
-  T extends LayoutTemplateReplacements | PageTemplateReplacements
+  T extends LayoutTemplateReplacements | PostTemplateReplacements
 >(name: HtmlTemplate, replacements: T): string {
   const template = handlebars.compile(
     fs.readFileSync(`templates/${name}.html`, "utf-8")
@@ -56,12 +56,11 @@ export async function renderPage(
     pageHtmlContents += transformBlockToHtml(block);
   }
 
-  const pageHtml = renderTemplate<PageTemplateReplacements>(HtmlTemplate.Page, {
+  const pageHtml = renderTemplate<PostTemplateReplacements>(HtmlTemplate.Page, {
     content: pageHtmlContents,
   });
 
   const css = loadStylesheet();
-
   let title = "Blog post" + Date.now();
 
   if (page.properties.title.type === "title") {
@@ -72,7 +71,7 @@ export async function renderPage(
 
   const html = renderTemplate<LayoutTemplateReplacements>(HtmlTemplate.Layout, {
     title,
-    page: pageHtml,
+    content: pageHtml,
     css,
   });
 

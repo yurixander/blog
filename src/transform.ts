@@ -97,70 +97,70 @@ export function transformRichTextToHtml(richText: RichTextItemResponse): Html {
 }
 
 const paragraphTransformer: Transformer<ParagraphBlockObjectResponse> = (
-  block
+  paragraph
 ) => {
   const contents = transformToHtmlString(
     transformRichTextToHtml,
-    block.paragraph.rich_text
+    paragraph.paragraph.rich_text
   );
 
   return createHtmlElement("p", contents);
 };
 
 export const heading1Transformer: Transformer<Heading1BlockObjectResponse> = (
-  block
+  heading1
 ) => {
   const contents = transformToHtmlString(
     transformRichTextToHtml,
-    block.heading_1.rich_text
+    heading1.heading_1.rich_text
   );
 
-  const tag = block.heading_1.is_toggleable ? "toggle" : "h1";
+  const tag = heading1.heading_1.is_toggleable ? "toggle" : "h1";
 
   return createHtmlElement(tag, contents);
 };
 
 export const heading2Transformer: Transformer<Heading2BlockObjectResponse> = (
-  block
+  heading2
 ) => {
   const contents = transformToHtmlString(
     transformRichTextToHtml,
-    block.heading_2.rich_text
+    heading2.heading_2.rich_text
   );
 
-  const tag = block.heading_2.is_toggleable ? "toggle" : "h2";
+  const tag = heading2.heading_2.is_toggleable ? "toggle" : "h2";
 
   return createHtmlElement(tag, contents);
 };
 
 const heading3Transformer: Transformer<Heading3BlockObjectResponse> = (
-  block
+  heading3
 ) => {
   const contents = transformToHtmlString(
     transformRichTextToHtml,
-    block.heading_3.rich_text
+    heading3.heading_3.rich_text
   );
 
-  const tag = block.heading_3.is_toggleable ? "toggle" : "h3";
+  const tag = heading3.heading_3.is_toggleable ? "toggle" : "h3";
 
   return createHtmlElement(tag, contents);
 };
 
 const bulletedListItemTransformer: Transformer<
   BulletedListItemBlockObjectResponse
-> = (block) => {
+> = (bulletedListItem) => {
   const contents = transformToHtmlString(
     transformRichTextToHtml,
-    block.bulleted_list_item.rich_text
+    bulletedListItem.bulleted_list_item.rich_text
   );
 
   return createHtmlElement("li", contents);
 };
 
-const quoteTransformer: Transformer<QuoteBlockObjectResponse> = (block) => {
+const quoteTransformer: Transformer<QuoteBlockObjectResponse> = (quote) => {
   const contents = transformToHtmlString(
     transformRichTextToHtml,
-    block.quote.rich_text
+    quote.quote.rich_text
   );
 
   return createHtmlElement("blockquote", contents);
@@ -168,34 +168,31 @@ const quoteTransformer: Transformer<QuoteBlockObjectResponse> = (block) => {
 
 const numberedListItemTransformer: Transformer<
   NumberedListItemBlockObjectResponse
-> = (block) => {
+> = (numberedListItem) => {
+  // TODO: This output should be encapsulated with `<ol>`.
+
   const contents = transformToHtmlString(
     transformRichTextToHtml,
-    block.numbered_list_item.rich_text
+    numberedListItem.numbered_list_item.rich_text
   );
 
   const item = createHtmlElement("li", contents);
   const container = createHtmlElement("ol", item);
 
   return container;
-  /* Output
-    <li>Testing</li>
-    <li>Improve</li>
-    */
-  // TODO: This output should be encapsulated with <ol>
 };
 
 const dividerTransformer: Transformer<DividerBlockObjectResponse> = () => {
   return createHtmlElement("hr", "");
 };
 
-const todoTransformer: Transformer<ToDoBlockObjectResponse> = (block) => {
-  const isChecked = block.to_do.checked ? "checked" : "";
+const todoTransformer: Transformer<ToDoBlockObjectResponse> = (todo) => {
+  const isChecked = todo.to_do.checked ? "checked" : "";
   const textTag = isChecked ? "del" : "p";
 
   const caption = transformToHtmlString(
     transformRichTextToHtml,
-    block.to_do.rich_text
+    todo.to_do.rich_text
   );
 
   const checkbox = createHtmlElement(
@@ -215,30 +212,32 @@ const todoTransformer: Transformer<ToDoBlockObjectResponse> = (block) => {
   return checkboxContainer;
 };
 
-const imageTransformer: Transformer<ImageBlockObjectResponse> = (block) => {
+const imageTransformer: Transformer<ImageBlockObjectResponse> = (image) => {
   const contents = transformToHtmlString(
     transformRichTextToHtml,
-    block.image.caption
+    image.image.caption
   );
 
-  if (block.image.type === "external") {
-    const image = createHtmlElement(
+  if (image.image.type === "external") {
+    const imageHtml = createHtmlElement(
       "img",
       "",
-      `src="${block.image.external.url}"`
+      `src="${image.image.external.url}"`
     );
 
     const caption = createHtmlElement("p", contents);
-    const container = createHtmlElement("div", `${image}${caption}`);
+    const container = createHtmlElement("div", `${imageHtml}${caption}`);
 
     return container;
-  }
-
-  if (block.image.type === "file") {
-    const image = createHtmlElement("img", "", `src="${block.image.file.url}"`);
+  } else if (image.image.type === "file") {
+    const imageHtml = createHtmlElement(
+      "img",
+      "",
+      `src="${image.image.file.url}"`
+    );
 
     const caption = createHtmlElement("p", contents);
-    const container = createHtmlElement("div", `${image}${caption}`);
+    const container = createHtmlElement("div", `${imageHtml}${caption}`);
 
     return container;
   }
@@ -246,20 +245,24 @@ const imageTransformer: Transformer<ImageBlockObjectResponse> = (block) => {
   return createHtmlElement("img", contents);
 };
 
-const calloutTransformer: Transformer<CalloutBlockObjectResponse> = (block) => {
+const calloutTransformer: Transformer<CalloutBlockObjectResponse> = (
+  callout
+) => {
   const richText = transformToHtmlString(
     transformRichTextToHtml,
-    block.callout.rich_text
+    callout.callout.rich_text
   );
 
-  let iconSrc = "";
+  let iconSrc: string;
 
-  if (block.callout.icon?.type === "external") {
-    iconSrc = block.callout.icon.external.url;
-  } else if (block.callout.icon?.type === "emoji") {
-    iconSrc = block.callout.icon.emoji;
-  } else if (block.callout.icon?.type === "file") {
-    iconSrc = block.callout.icon.file.url;
+  if (callout.callout.icon?.type === "external") {
+    iconSrc = callout.callout.icon.external.url;
+  } else if (callout.callout.icon?.type === "emoji") {
+    iconSrc = callout.callout.icon.emoji;
+  } else if (callout.callout.icon?.type === "file") {
+    iconSrc = callout.callout.icon.file.url;
+  } else {
+    throw new Error(`Icon type is undefined`);
   }
 
   const icon = createHtmlElement("img", "", `class="icon" src="${iconSrc}"`);
