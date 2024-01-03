@@ -1,6 +1,7 @@
 import {Client} from "@notionhq/client"
 import {
   EnvironmentVariable,
+  isBlockObjectResponse,
   isPageObjectResponse,
   requireEnvVariable,
 } from "./util.js"
@@ -76,4 +77,19 @@ export async function fetchSharedPages(): Promise<PageObjectResponse[]> {
   }
 
   return pages
+}
+
+export async function fetchBlockChildren(
+  blockId: string
+): Promise<BlockObjectResponse[]> {
+  const children = await getOrSetNotionClient().blocks.children.list({
+    block_id: blockId,
+  })
+  const blocks: BlockObjectResponse[] = []
+  for (const result of children.results) {
+    if (isBlockObjectResponse(result)) {
+      blocks.push(result)
+    }
+  }
+  return blocks
 }

@@ -27,6 +27,8 @@
     "@typescript-eslint/return-await": "warn",
     "no-unused-expressions": "off",
     "@typescript-eslint/no-unused-expressions": "warn",
-    "@typescript-eslint/no-misused-promises": "warn"
+    "@typescript-eslint/no-misused-promises": "warn",
+    "@typescript-eslint/restrict-plus-operands": "warn",
+    "@typescript-eslint/no-base-to-string": "warn"
   }
 }

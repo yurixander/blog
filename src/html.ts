@@ -15,7 +15,7 @@ import {
   type PageTemplateReplacements,
 } from "./index.js"
 import handlebars from "handlebars"
-import {fetchPageContents} from "./notionApi.js"
+import {fetchBlockChildren, fetchPageContents} from "./notionApi.js"
 
 export enum HtmlTemplate {
   Layout = "layout",
@@ -25,6 +25,23 @@ export enum HtmlTemplate {
 export type RenderedPage = {
   title: string
   html: Html
+}
+
+enum HeadingType {
+  H1 = "h1",
+  H2 = "h2",
+  H3 = "h3",
+}
+
+export function createToggleableElement(
+  title: Html,
+  content: Html,
+  headingType: HeadingType
+): Html {
+  return `<details>
+  <summary data="${headingType}">${title}</summary>
+  ${content}
+</details>`
 }
 
 export function createHtmlElement(
@@ -72,7 +89,10 @@ export function transformRichTextToHtml(richText: RichTextItemResponse): Html {
   todo()
 }
 
-export function transformBlockToHtml(block: BlockObjectResponse): Html {
+export function transformBlockToHtml(
+  block: BlockObjectResponse,
+  children?: Html
+): Html {
   if (block.type === "paragraph") {
     const contents = transformToHtmlString(
       transformRichTextToHtml,
@@ -85,24 +105,40 @@ export function transformBlockToHtml(block: BlockObjectResponse): Html {
       transformRichTextToHtml,
       block.heading_1.rich_text
     )
-    const tag = block.heading_1.is_toggleable ? "toggle" : "h1"
-    return createHtmlElement(tag, contents)
+
+    if (block.heading_1.is_toggleable) {
+      if (block.has_children && children !== undefined) {
+        return createToggleableElement(contents, children, HeadingType.H1)
+      }
+      return createToggleableElement(contents, "", HeadingType.H1)
+    }
+    return createHtmlElement("h1", contents)
   }
   if (block.type === "heading_2") {
     const contents = transformToHtmlString(
       transformRichTextToHtml,
       block.heading_2.rich_text
     )
-    const tag = block.heading_2.is_toggleable ? "toggle" : "h2"
-    return createHtmlElement(tag, contents)
+    if (block.heading_2.is_toggleable) {
+      if (block.has_children && children !== undefined) {
+        return createToggleableElement(contents, children, HeadingType.H2)
+      }
+      return createToggleableElement(contents, "", HeadingType.H2)
+    }
+    return createHtmlElement("h2", contents)
   }
   if (block.type === "heading_3") {
     const contents = transformToHtmlString(
       transformRichTextToHtml,
       block.heading_3.rich_text
     )
-    const tag = block.heading_3.is_toggleable ? "toggle" : "h3"
-    return createHtmlElement(tag, contents)
+    if (block.heading_3.is_toggleable) {
+      if (block.has_children && children !== undefined) {
+        return createToggleableElement(contents, children, HeadingType.H3)
+      }
+      return createToggleableElement(contents, "", HeadingType.H3)
+    }
+    return createHtmlElement("h3", contents)
   }
   if (block.type === "bulleted_list_item") {
     const contents = transformToHtmlString(
@@ -138,7 +174,7 @@ export function transformBlockToHtml(block: BlockObjectResponse): Html {
   }
   if (block.type === "to_do") {
     const isChecked = block.to_do.checked ? "checked" : ""
-    const textTag = isChecked ? "del" : "p"
+    const textTag = isChecked ? "del" : "span"
 
     const caption = transformToHtmlString(
       transformRichTextToHtml,
@@ -243,7 +279,19 @@ export async function renderPage(
       continue
     }
 
-    pageHtmlContents += transformBlockToHtml(block)
+    if (block.has_children) {
+      console.log("000000000000000000000000000")
+      const childrens = await fetchBlockChildren(block.id)
+      let childrenHtmlContents: Html = ""
+
+      for (const children of childrens) {
+        childrenHtmlContents += transformBlockToHtml(children)
+      }
+      // TODO: Check why not arrive childrenHtmlContents to summary content after the first
+      pageHtmlContents += transformBlockToHtml(block, childrenHtmlContents)
+    } else {
+      pageHtmlContents += transformBlockToHtml(block)
+    }
   }
 
   const pageHtml = renderTemplate<PageTemplateReplacements>(HtmlTemplate.Page, {
