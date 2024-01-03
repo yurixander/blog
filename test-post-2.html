@@ -47,6 +47,7 @@
       /* REVIEW: Perhaps using a file instead would be best for SEO, since CSS styling files can be cached? */
       :root {
   --gap-blocks: 1rem;
+  --font-size-title: 2.25rem;
   --font-size-base: 1rem;
   --font-size-h1: 2rem;
   --font-size-h2: 1.5rem;
@@ -151,7 +152,7 @@ img {
 }
 
 .title {
-  font-size: 35px;
+  font-size: var(--font-size-title);
   font-family: sans-serif;
   color: rgb(250, 250, 250);
   width: 100%;
