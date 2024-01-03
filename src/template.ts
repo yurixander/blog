@@ -1,7 +1,7 @@
 import {type PageObjectResponse} from "@notionhq/client/build/src/api-endpoints.js";
 import fs from "fs";
 import handlebars from "handlebars";
-import {fetchPageContents} from "./notionApi.js";
+import {fetchBlockChildren, fetchPageContents} from "./notionApi.js";
 import {transformBlockToHtml} from "./transform.js";
 import {isBlockObjectResponse, type Html} from "./util.js";
 
@@ -59,7 +59,19 @@ export async function renderPage(
       continue;
     }
 
-    pageHtmlContents += transformBlockToHtml(block);
+    if (block.has_children) {
+      console.log("000000000000000000000000000");
+      const childrens = await fetchBlockChildren(block.id);
+      let childrenHtmlContents: Html = "";
+
+      for (const children of childrens) {
+        childrenHtmlContents += transformBlockToHtml(children);
+      }
+      // TODO: Check why not arrive childrenHtmlContents to summary content after the first
+      pageHtmlContents += transformBlockToHtml(block, childrenHtmlContents);
+    } else {
+      pageHtmlContents += transformBlockToHtml(block);
+    }
   }
 
   const pageHtml = renderTemplate<PostTemplateReplacements>(HtmlTemplate.Page, {

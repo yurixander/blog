@@ -18,12 +18,21 @@ import {todo, type Html} from "./util.js";
 
 type Transformer<T extends BlockObjectResponse = never> = (block: T) => Html;
 
-export function transformBlockToHtml(block: BlockObjectResponse): Html {
+enum HeadingType {
+  H1 = "h1",
+  H2 = "h2",
+  H3 = "h3",
+}
+
+export function transformBlockToHtml(
+  block: BlockObjectResponse,
+  children?: Html
+): Html {
   switch (block.type) {
     case "paragraph":
       return paragraphTransformer(block);
     case "heading_1":
-      return heading1Transformer(block);
+      return heading1Transformer(block, children);
     case "heading_2":
       return heading2Transformer(block);
     case "heading_3":
@@ -63,6 +72,17 @@ function createHtmlElementList(tags: string[], content: Html): string {
   }
 
   return formattedTags.join("");
+}
+
+function createToggleableElement(
+  title: Html,
+  content: Html,
+  headingType: HeadingType
+): Html {
+  return `<details>
+  <summary data="${headingType}">${title}</summary>
+  ${content}
+</details>`;
 }
 
 export function transformRichTextToHtml(richText: RichTextItemResponse): Html {
@@ -107,43 +127,58 @@ const paragraphTransformer: Transformer<ParagraphBlockObjectResponse> = (
   return createHtmlElement("p", contents);
 };
 
-export const heading1Transformer: Transformer<Heading1BlockObjectResponse> = (
-  heading1
+export const heading1Transformer = (
+  heading1: Heading1BlockObjectResponse,
+  children?: Html
 ) => {
   const contents = transformToHtmlString(
     transformRichTextToHtml,
     heading1.heading_1.rich_text
   );
 
-  const tag = heading1.heading_1.is_toggleable ? "toggle" : "h1";
-
-  return createHtmlElement(tag, contents);
+  if (heading1.heading_1.is_toggleable) {
+    if (heading1.has_children && children !== undefined) {
+      return createToggleableElement(contents, children, HeadingType.H1);
+    }
+    return createToggleableElement(contents, "", HeadingType.H1);
+  }
+  return createHtmlElement("h1", contents);
 };
 
-export const heading2Transformer: Transformer<Heading2BlockObjectResponse> = (
-  heading2
+export const heading2Transformer = (
+  heading2: Heading2BlockObjectResponse,
+  children?: Html
 ) => {
   const contents = transformToHtmlString(
     transformRichTextToHtml,
     heading2.heading_2.rich_text
   );
 
-  const tag = heading2.heading_2.is_toggleable ? "toggle" : "h2";
-
-  return createHtmlElement(tag, contents);
+  if (heading2.heading_2.is_toggleable) {
+    if (heading2.has_children && children !== undefined) {
+      return createToggleableElement(contents, children, HeadingType.H2);
+    }
+    return createToggleableElement(contents, "", HeadingType.H2);
+  }
+  return createHtmlElement("h2", contents);
 };
 
-const heading3Transformer: Transformer<Heading3BlockObjectResponse> = (
-  heading3
+const heading3Transformer = (
+  heading3: Heading3BlockObjectResponse,
+  children?: Html
 ) => {
   const contents = transformToHtmlString(
     transformRichTextToHtml,
     heading3.heading_3.rich_text
   );
 
-  const tag = heading3.heading_3.is_toggleable ? "toggle" : "h3";
-
-  return createHtmlElement(tag, contents);
+  if (heading3.heading_3.is_toggleable) {
+    if (heading3.has_children && children !== undefined) {
+      return createToggleableElement(contents, children, HeadingType.H3);
+    }
+    return createToggleableElement(contents, "", HeadingType.H3);
+  }
+  return createHtmlElement("h3", contents);
 };
 
 const bulletedListItemTransformer: Transformer<
@@ -188,7 +223,7 @@ const dividerTransformer: Transformer<DividerBlockObjectResponse> = () => {
 
 const todoTransformer: Transformer<ToDoBlockObjectResponse> = (todo) => {
   const isChecked = todo.to_do.checked ? "checked" : "";
-  const textTag = isChecked ? "del" : "p";
+  const textTag = isChecked ? "del" : "span";
 
   const caption = transformToHtmlString(
     transformRichTextToHtml,
