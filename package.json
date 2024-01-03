@@ -9,6 +9,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc --build .",
+    "build:css": "npx postcss styles/* -o dist/compiled-styles.css",
     "start": "yarn build && node dist/index.js"
   },
   "dependencies": {
@@ -19,6 +20,7 @@
     "handlebars": "^4.7.8",
     "moment-timezone": "^0.5.43",
     "simple-git": "^3.21.0",
+    "tailwindcss": "^3.4.0",
     "winston": "^3.11.0"
   },
   "devDependencies": {
@@ -27,6 +29,7 @@
     "@types/google-closure-compiler": "^0.0.22",
     "@typescript-eslint/eslint-plugin": "^6.4.0",
     "autoprefixer": "^10.4.16",
+    "cssnano": "^6.0.2",
     "eslint": "^8.0.1",
     "eslint-config-prettier": "^9.1.0",
     "eslint-config-standard-with-typescript": "^43.0.0",
@@ -35,6 +38,7 @@
     "eslint-plugin-promise": "^6.0.0",
     "husky": "^8.0.3",
     "postcss": "^8.4.32",
+    "postcss-cli": "^11.0.0",
     "postcss-import": "^15.1.0",
     "typescript": "*"
   }

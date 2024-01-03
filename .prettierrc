@@ -1,9 +1,12 @@
 {
-  "semi": false,
+  "semi": true,
   "tabWidth": 2,
   "trailingComma": "es5",
   "bracketSpacing": false,
   "bracketSameLine": true,
-  "arrowParens": "avoid",
-  "quoteProps": "consistent"
+  "arrowParens": "always",
+  "quoteProps": "consistent",
+  "singleQuote": false,
+  "endOfLine": "lf",
+  "useTabs": false
 }

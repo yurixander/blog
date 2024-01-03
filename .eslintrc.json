@@ -29,6 +29,19 @@
     "@typescript-eslint/no-unused-expressions": "warn",
     "@typescript-eslint/no-misused-promises": "warn",
     "@typescript-eslint/restrict-plus-operands": "warn",
-    "@typescript-eslint/no-base-to-string": "warn"
+    "@typescript-eslint/no-base-to-string": "warn",
+    "brace-style": [
+      "error",
+      "1tbs",
+      {
+        "allowSingleLine": true
+      }
+    ],
+    "newline-per-chained-call": [
+      "error",
+      {
+        "ignoreChainWithDepth": 2
+      }
+    ]
   }
 }
