@@ -17,7 +17,7 @@ export type PostTemplateReplacements = {
 
 export enum HtmlTemplate {
   Layout = "layout",
-  Page = "page",
+  Page = "post",
 }
 
 export type RenderedPage = {
@@ -45,7 +45,7 @@ export function renderTemplate<
 
 export function loadStylesheet(): Html {
   // TODO: Use PostCSS package to programmatically process CSS, along with some plugins like autoprefixer, and minify.
-  return fs.readFileSync("style.css", "utf-8");
+  return fs.readFileSync("styles/styles.css", "utf-8");
 }
 
 export async function renderPage(

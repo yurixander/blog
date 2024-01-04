@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-#npx stylelint "**/*.css"
-#npx eslint "src/**/*.ts"
+npx stylelint "**/*.css"
+npx eslint "src/**/*.ts"
