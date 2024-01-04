@@ -38,7 +38,7 @@
       }
     ],
     "newline-per-chained-call": [
-      "error",
+      "warn",
       {
         "ignoreChainWithDepth": 2
       }
