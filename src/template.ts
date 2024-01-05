@@ -68,8 +68,6 @@ export async function renderPage(
       for (const child of children) {
         childrenHtmlContents += transformBlockToHtml(child);
       }
-
-      // TODO: Check why not arrive childrenHtmlContents to summary content after the first.
       pageHtmlContents += transformBlockToHtml(block, childrenHtmlContents);
     } else {
       pageHtmlContents += transformBlockToHtml(block);

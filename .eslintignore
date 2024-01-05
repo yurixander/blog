@@ -9,3 +9,6 @@ tsconfig.json
 package.json
 LICENSE
 lastEditedTime
+commitlint.config.ts
+tailwind.config.js
+postcss.config.ts

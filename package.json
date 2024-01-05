@@ -11,7 +11,8 @@
     "prepare": "husky install",
     "build": "tsc --build .",
     "build:css": "npx postcss styles/* -o dist/compiled-styles.css",
-    "start": "yarn build && node dist/index.js"
+    "start": "yarn build && node dist/index.js",
+    "tailwind": "npx tailwindcss -i ./styles/tailwind.css -o ./styles/styles.css"
   },
   "dependencies": {
     "@notionhq/client": "^2.2.14",
@@ -21,7 +22,6 @@
     "handlebars": "^4.7.8",
     "moment-timezone": "^0.5.43",
     "simple-git": "^3.21.0",
-    "tailwindcss": "^3.4.0",
     "winston": "^3.11.0"
   },
   "devDependencies": {
@@ -42,6 +42,7 @@
     "postcss-cli": "^11.0.0",
     "postcss-import": "^15.1.0",
     "stylelint-config-standard": "^36.0.0",
+    "tailwindcss": "^3.4.0",
     "typescript": "^5.3.3"
   }
 }

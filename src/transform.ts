@@ -34,9 +34,9 @@ export function transformBlockToHtml(
     case "heading_1":
       return heading1Transformer(block, children);
     case "heading_2":
-      return heading2Transformer(block);
+      return heading2Transformer(block, children);
     case "heading_3":
-      return heading3Transformer(block);
+      return heading3Transformer(block, children);
     case "bulleted_list_item":
       return bulletedListItemTransformer(block);
     case "quote":
