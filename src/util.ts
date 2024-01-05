@@ -32,12 +32,14 @@ export function getOrSetLogger(): Logger {
       EnvironmentVariable.LoggerTimezone
     );
 
+    const timestampFormat = () =>
+      moment().tz(loggerTimezone).format("YYYY-MM-DD hh:mm:ss A");
+
     loggerSingleton = winston.createLogger({
       level: "info",
       format: winston.format.combine(
         winston.format.timestamp({
-          format: () =>
-            moment().tz(loggerTimezone).format("YYYY-MM-DD hh:mm:ss A"),
+          format: timestampFormat,
         }),
         winston.format.colorize(),
         winston.format.printf(

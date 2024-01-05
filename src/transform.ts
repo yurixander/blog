@@ -110,7 +110,8 @@ export function transformRichTextToHtml(richText: RichTextItemResponse): Html {
 
     return createHtmlElement("span", text, args);
   }
-  // TODO: Handle href
+
+  // TODO: Handle href.
   // TODO: Process other types of rich text.
   console.debug(richText);
   todo();
@@ -137,11 +138,11 @@ export const heading1Transformer = (
   );
 
   if (heading1.heading_1.is_toggleable) {
-    if (heading1.has_children && children !== undefined) {
-      return createToggleableElement(contents, children, HeadingType.H1);
-    }
-    return createToggleableElement(contents, "", HeadingType.H1);
+    const childrenParam = children ?? "";
+
+    return createToggleableElement(contents, childrenParam, HeadingType.H1);
   }
+
   return createHtmlElement("h1", contents);
 };
 

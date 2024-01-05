@@ -8,6 +8,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "prepare": "husky install",
     "build": "tsc --build .",
     "build:css": "npx postcss styles/* -o dist/compiled-styles.css",
     "start": "yarn build && node dist/index.js"
@@ -41,6 +42,6 @@
     "postcss-cli": "^11.0.0",
     "postcss-import": "^15.1.0",
     "stylelint-config-standard": "^36.0.0",
-    "typescript": "*"
+    "typescript": "^5.3.3"
   }
 }

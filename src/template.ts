@@ -25,8 +25,10 @@ export type RenderedPage = {
   html: Html;
 };
 
+type HtmlTag = keyof HTMLElementTagNameMap;
+
 export function createHtmlElement(
-  tag: string,
+  tag: HtmlTag,
   contents: Html,
   args?: string
 ): Html {
@@ -60,14 +62,14 @@ export async function renderPage(
     }
 
     if (block.has_children) {
-      console.log("000000000000000000000000000");
-      const childrens = await fetchBlockChildren(block.id);
+      const children = await fetchBlockChildren(block.id);
       let childrenHtmlContents: Html = "";
 
-      for (const children of childrens) {
-        childrenHtmlContents += transformBlockToHtml(children);
+      for (const child of children) {
+        childrenHtmlContents += transformBlockToHtml(child);
       }
-      // TODO: Check why not arrive childrenHtmlContents to summary content after the first
+
+      // TODO: Check why not arrive childrenHtmlContents to summary content after the first.
       pageHtmlContents += transformBlockToHtml(block, childrenHtmlContents);
     } else {
       pageHtmlContents += transformBlockToHtml(block);
