@@ -82,10 +82,10 @@ export function transformBlockToHtml(
 
 export function extractColor(color: string): string {
   const isColor = colors.includes(color);
-  const isBackgroundColor = colors.includes(color);
+  const isBackgroundColor = backgroundColors.includes(color);
 
   if (isColor) {
-    return `class="text-${color}-300"`;
+    return `class="text-${color}-600"`;
   }
   if (isBackgroundColor) {
     // TODO: Handle here when is background-color
