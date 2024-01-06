@@ -6,7 +6,7 @@ import {transformBlockToHtml} from "./transform.js";
 import {isBlockObjectResponse, type Html} from "./util.js";
 
 export type LayoutTemplateReplacements = {
-  title: string;
+  postTitle: string;
   content: Html;
   css: string;
 };
@@ -90,7 +90,7 @@ export async function renderPage(
   }
 
   const html = renderTemplate<LayoutTemplateReplacements>(HtmlTemplate.Layout, {
-    title,
+    postTitle: title,
     content: pageHtml,
     css,
   });
