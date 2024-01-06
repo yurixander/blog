@@ -5,9 +5,9 @@ import tailwindcss from "tailwindcss";
 
 export default {
   plugins: [
-    postcssImport,
-    autoprefixer,
-    tailwindcss,
+    postcssImport(),
+    autoprefixer(),
+    tailwindcss(),
     cssnano({
       preset: "default",
     }),

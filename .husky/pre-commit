@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-npx stylelint "**/*.css"
+# TODO: Check some plugin tailwindcss with stylelint
+#npx stylelint "**/*.css"
 npx eslint "src/**/*.ts"

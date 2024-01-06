@@ -24,6 +24,30 @@ enum HeadingType {
   H3 = "h3",
 }
 
+const colors = [
+  "gray",
+  "brown",
+  "orange",
+  "yellow",
+  "green",
+  "blue",
+  "purple",
+  "pink",
+  "red",
+];
+
+const backgroundColors = [
+  "gray_background",
+  "brown_background",
+  "orange_background",
+  "yellow_background",
+  "green_background",
+  "blue_background",
+  "purple_background",
+  "pink_background",
+  "red_background",
+];
+
 export function transformBlockToHtml(
   block: BlockObjectResponse,
   children?: Html
@@ -54,6 +78,21 @@ export function transformBlockToHtml(
     default:
       throw new Error(`Unknown block type: ${block.type}`);
   }
+}
+
+export function extractColor(color: string): string {
+  const isColor = colors.includes(color);
+  const isBackgroundColor = colors.includes(color);
+
+  if (isColor) {
+    return `class="text-${color}-300"`;
+  }
+  if (isBackgroundColor) {
+    // TODO: Handle here when is background-color
+    throw new Error("Not handle background color");
+  }
+
+  throw new Error(`Unknown color : ${color}`);
 }
 
 export function transformToHtmlString<T>(
@@ -99,13 +138,17 @@ export function transformRichTextToHtml(richText: RichTextItemResponse): Html {
     } else if (richText.annotations.strikethrough) {
       listTag.unshift("del");
     } else if (richText.annotations.color !== "default") {
-      args = `style="color: ${richText.annotations.color};"`;
+      args = extractColor(richText.annotations.color);
     }
 
     const text = createHtmlElementList(listTag, richText.text.content);
 
     if (richText.text.link?.url !== undefined) {
-      return createHtmlElement("a", text, `href="${richText.text.link?.url}"`);
+      return createHtmlElement(
+        "a",
+        text,
+        `class="underline" href="${richText.text.link?.url}"`
+      );
     }
 
     return createHtmlElement("span", text, args);

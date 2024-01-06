@@ -20,6 +20,20 @@
   --max-img-width-small: 18.75rem;
 }
 
+/* TODO: Optimize for CSS properties that are used in HTML. */
+
+.text-h1 {
+  font-size: var(--font-size-h1);
+}
+
+.text-h2 {
+  font-size: var(--font-size-h2);
+}
+
+.text-h3 {
+  font-size: var(--font-size-h3);
+}
+
 summary[data="h1"] span {
   font-size: 2rem;
 }
@@ -122,13 +136,6 @@ ol {
 li {
   font-family: sans-serif;
   font-size: 16px;
-}
-
-blockquote {
-  border-left: 2px solid white;
-  font-family: sans-serif;
-  padding: 2px;
-  padding-left: 10px;
 }
 
 span {
