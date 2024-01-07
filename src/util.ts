@@ -10,16 +10,17 @@ import moment from "moment-timezone";
 import winston, {type Logger} from "winston";
 
 export enum EnvironmentVariable {
+  SiteTitle = "SITE_TITLE",
   CheckInterval = "CHECK_INTERVAL",
   LastEditedTimeFilename = "LAST_EDITED_TIME_FILENAME",
-  GithubProjectUrl = "GITHUB_PROJECT_URL",
-  GithubPagesBranchName = "GITHUB_PAGES_BRANCH_NAME",
   WorkspacePath = "WORKSPACE_PATH",
   NotionToken = "NOTION_TOKEN",
-  GithubPersonalAccessToken = "GITHUB_PERSONAL_ACCESS_TOKEN",
-  GithubUsername = "GITHUB_USERNAME",
-  GithubEmail = "GITHUB_EMAIL",
   LoggerTimezone = "LOGGER_TIMEZONE",
+  GithubProjectUrl = "GIT_PROJECT_URL",
+  GithubPagesBranchName = "GIT_PAGES_BRANCH_NAME",
+  GithubPersonalAccessToken = "GIT_PERSONAL_ACCESS_TOKEN",
+  GithubUsername = "GIT_USERNAME",
+  GithubEmail = "GIT_EMAIL",
 }
 
 export type Html = string;
