@@ -24,6 +24,20 @@ enum HeadingType {
   H3 = "h3",
 }
 
+enum ElementClass {
+  H1 = `class="text-h1"`,
+  H2 = `class="text-h2"`,
+  H3 = `class="text-h3"`,
+  BulletedList = `class="max-w-full break-words mt-0"`,
+  Blockquote = `class="border-l-2 ps-2 p-1"`,
+  NumberedList = `class="list-decimal pl-4"`,
+  CheckboxContainer = `class="flex gap-2 items-center"`,
+  Checkbox = `class="size-3.5 appearance-none border-2 checked:border-none checked:bg-checkIcon checked:bg-blue-700" type="checkbox" disabled`,
+  Image = `class="max-w-xl object-cover"`,
+  CalloutContainer = `class="flex gap-2 p-2 rounded-md bg-neutral-700"`,
+  CalloutIcon = `class="size-5"`,
+}
+
 const colors = [
   "gray",
   "brown",
@@ -119,7 +133,7 @@ function createToggleableElement(
   headingType: HeadingType
 ): Html {
   return `<details>
-  <summary data="${headingType}">${title}</summary>
+  <summary><span class="text-${headingType} break-words">${title}</span></summary>
   ${content}
 </details>`;
 }
@@ -186,7 +200,7 @@ export const heading1Transformer = (
     return createToggleableElement(contents, childrenParam, HeadingType.H1);
   }
 
-  return createHtmlElement("h1", contents);
+  return createHtmlElement("h1", contents, ElementClass.H1);
 };
 
 export const heading2Transformer = (
@@ -204,7 +218,7 @@ export const heading2Transformer = (
     }
     return createToggleableElement(contents, "", HeadingType.H2);
   }
-  return createHtmlElement("h2", contents);
+  return createHtmlElement("h2", contents, ElementClass.H2);
 };
 
 const heading3Transformer = (
@@ -222,7 +236,7 @@ const heading3Transformer = (
     }
     return createToggleableElement(contents, "", HeadingType.H3);
   }
-  return createHtmlElement("h3", contents);
+  return createHtmlElement("h3", contents, ElementClass.H3);
 };
 
 const bulletedListItemTransformer: Transformer<
@@ -233,7 +247,7 @@ const bulletedListItemTransformer: Transformer<
     bulletedListItem.bulleted_list_item.rich_text
   );
 
-  return createHtmlElement("li", contents);
+  return createHtmlElement("li", contents, ElementClass.BulletedList);
 };
 
 const quoteTransformer: Transformer<QuoteBlockObjectResponse> = (quote) => {
@@ -242,7 +256,7 @@ const quoteTransformer: Transformer<QuoteBlockObjectResponse> = (quote) => {
     quote.quote.rich_text
   );
 
-  return createHtmlElement("blockquote", contents);
+  return createHtmlElement("blockquote", contents, ElementClass.Blockquote);
 };
 
 const numberedListItemTransformer: Transformer<
@@ -277,7 +291,7 @@ const todoTransformer: Transformer<ToDoBlockObjectResponse> = (todo) => {
   const checkbox = createHtmlElement(
     "input",
     "",
-    `type="checkbox" ${isChecked} disabled="true"`
+    `${ElementClass.Checkbox} ${isChecked}`
   );
 
   const text = createHtmlElement(textTag, caption);
@@ -285,7 +299,7 @@ const todoTransformer: Transformer<ToDoBlockObjectResponse> = (todo) => {
   const checkboxContainer = createHtmlElement(
     "div",
     `${checkbox}${text}`,
-    `class="checkbox-container"`
+    ElementClass.CheckboxContainer
   );
 
   return checkboxContainer;
@@ -301,7 +315,7 @@ const imageTransformer: Transformer<ImageBlockObjectResponse> = (image) => {
     const imageHtml = createHtmlElement(
       "img",
       "",
-      `src="${image.image.external.url}"`
+      `${ElementClass.Image} src="${image.image.external.url}"`
     );
 
     const caption = createHtmlElement("p", contents);
@@ -312,7 +326,7 @@ const imageTransformer: Transformer<ImageBlockObjectResponse> = (image) => {
     const imageHtml = createHtmlElement(
       "img",
       "",
-      `src="${image.image.file.url}"`
+      `${ElementClass.Image} src="${image.image.file.url}"`
     );
 
     const caption = createHtmlElement("p", contents);
@@ -344,13 +358,18 @@ const calloutTransformer: Transformer<CalloutBlockObjectResponse> = (
     throw new Error(`Icon type is undefined`);
   }
 
-  const icon = createHtmlElement("img", "", `class="icon" src="${iconSrc}"`);
+  const icon = createHtmlElement(
+    "img",
+    "",
+    `${ElementClass.CalloutIcon} src="${iconSrc}"`
+  );
+
   const text = createHtmlElement("p", richText);
 
   const container = createHtmlElement(
     "div",
     `${icon}${text}`,
-    `class="callout"`
+    ElementClass.CalloutContainer
   );
 
   return container;

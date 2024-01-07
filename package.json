@@ -12,8 +12,7 @@
     "build": "tsc --build .",
     "build:css": "npx postcss styles/* -o dist/compiled-styles.css",
     "start": "yarn build && node dist/index.js",
-    "tailwind": "npx tailwindcss -i ./styles/tailwind.css -o ./styles/styles.css",
-    "tailwind-watch": "npx tailwindcss -i ./styles/tailwind.css -o ./styles/styles.css --watch"
+    "tailwind": "npx tailwindcss -i ./styles/tailwind.css -o ./styles/styles.css"
   },
   "dependencies": {
     "@notionhq/client": "^2.2.14",
