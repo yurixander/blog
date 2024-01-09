@@ -17,6 +17,7 @@ import {
   tryInitializeWorkspace,
   writeWorkspaceFile,
 } from "./workspace.js";
+import {generateSitemap} from "./sitemap.js";
 
 // Load environment variables from `.env` file.
 config();
@@ -109,6 +110,8 @@ async function deploy(pages: PageObjectResponse[]): Promise<void> {
     await writeWorkspaceFile(filename, renderedPage.html);
     logger.info(`Wrote: ${filename}.`);
   }
+
+  void generateSitemap();
 
   await stageCommitAndPush();
   logger.info("Published changes to GitHub.");
