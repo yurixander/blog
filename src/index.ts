@@ -12,6 +12,7 @@ import {
 } from "./util.js";
 import {
   stageCommitAndPush,
+  tryCleanFilesWorkspace,
   tryCleanWorkspace,
   tryInitializeWorkspace,
   writeWorkspaceFile,
@@ -94,6 +95,8 @@ async function deploy(pages: PageObjectResponse[]): Promise<void> {
     "Workspace should be successfully initialized after cleaning."
   );
 
+  tryCleanFilesWorkspace();
+
   // TODO: Need to have a sitemap be the index file, and then create a new file for each blog post.
 
   for (const page of pages) {
@@ -133,25 +136,5 @@ async function deployModifiedPages(): Promise<void> {
 
 // Check for changes every X milliseconds (based in the
 // `.env` environment variable).
-setInterval(() => {
-  void deployModifiedPages();
-}, parseInt(requireEnvVariable(EnvironmentVariable.CheckInterval)));
-
-// Entry point.
-(() => {
-  const checkInterval = parseInt(
-    requireEnvVariable(EnvironmentVariable.CheckInterval)
-  );
-
-  // 5 minutes.
-  const MINIMUM_SUGGESTED_CHECK_INTERVAL = 1000 * 60 * 5;
-
-  if (checkInterval < MINIMUM_SUGGESTED_CHECK_INTERVAL) {
-    getOrSetLogger().warn(
-      `Check interval is set to ${checkInterval}ms, which is less than the minimum recommended value of ${MINIMUM_SUGGESTED_CHECK_INTERVAL}ms.`
-    );
-  }
-
-  // Initial deployment attempt when the script is first run.
-  void deployModifiedPages();
-})();
+// Initial deployment attempt when the script is first run.
+void deployModifiedPages();

@@ -5,4 +5,5 @@ lastEditedTime.json
 .workspace
 *.log
 package-lock.json
-lastEditedTime
+lastEditedTime.json
+styles\styles.css

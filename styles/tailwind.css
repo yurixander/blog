@@ -22,16 +22,20 @@
 
 /* TODO: Optimize for CSS properties that are used in HTML. */
 
-.text-h1 {
-  font-size: var(--font-size-h1);
+h1 {
+  @apply text-3xl;
 }
 
-.text-h2 {
-  font-size: var(--font-size-h2);
+h2 {
+  @apply text-2xl;
 }
 
-.text-h3 {
-  font-size: var(--font-size-h3);
+h3 {
+  @apply text-xl;
+}
+
+a {
+  @apply underline;
 }
 
 * {
@@ -50,4 +54,60 @@ body {
   gap: 50px;
   font-family: sans-serif;
   background-color: #191919;
+}
+
+li {
+  @apply max-w-full break-words mt-0;
+}
+
+ol {
+  @apply list-decimal pl-4;
+}
+
+blockquote {
+  @apply border-l-2 ps-2 p-1;
+}
+
+input[checkbox] {
+  @apply size-3.5 appearance-none border-2;
+}
+
+input[checkbox]:checked {
+  @apply border-none bg-checkIcon bg-blue-700;
+}
+
+.checkbox-container {
+  @apply flex gap-2 items-center;
+}
+
+.callout-container {
+  @apply flex gap-2 p-2 rounded-md bg-neutral-700;
+}
+
+.callout-container > .icon {
+  @apply size-5;
+}
+
+details > summary {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  list-style: none;
+}
+
+details > summary::-webkit-details-marker {
+  @apply hidden;
+}
+
+details > summary:before {
+  content: "▶";
+  @apply mr-2 text-xs;
+}
+
+details[open] > summary:before {
+  content: "▼";
+}
+
+img {
+  @apply max-w-xl object-cover;
 }

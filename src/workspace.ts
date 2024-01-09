@@ -56,6 +56,25 @@ export async function tryInitializeWorkspace(): Promise<boolean> {
   return true;
 }
 
+export function tryCleanFilesWorkspace() {
+  const workspacePath = requireEnvVariable(EnvironmentVariable.WorkspacePath);
+
+  if (!fs.existsSync(workspacePath)) {
+    return false;
+  }
+
+  const files = fs.readdirSync(workspacePath);
+
+  for (const file of files) {
+    if (file === ".git") {
+      continue;
+    }
+    fs.unlinkSync(path.join(workspacePath, file));
+  }
+
+  return true;
+}
+
 export function tryCleanWorkspace(): boolean {
   const workspacePath = requireEnvVariable(EnvironmentVariable.WorkspacePath);
 
