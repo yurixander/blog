@@ -12,7 +12,7 @@ import {
 } from "./util.js";
 import {
   stageCommitAndPush,
-  tryCleanFilesWorkspace,
+  tryCleanFilesOfWorkspace,
   tryCleanWorkspace,
   tryInitializeWorkspace,
   writeWorkspaceFile,
@@ -89,6 +89,7 @@ async function deploy(pages: PageObjectResponse[]): Promise<void> {
   // TODO: Show a list of the modified pages' titles.
   logger.info(`Deploying ${pages.length} modified page(s).`);
 
+  // TODO: Merge tryCleanWorkspace with tryCleanFilesOfWorkspace
   tryCleanWorkspace();
 
   assert(
@@ -96,9 +97,7 @@ async function deploy(pages: PageObjectResponse[]): Promise<void> {
     "Workspace should be successfully initialized after cleaning."
   );
 
-  tryCleanFilesWorkspace();
-
-  // TODO: Need to have a sitemap be the index file, and then create a new file for each blog post.
+  tryCleanFilesOfWorkspace();
 
   for (const page of pages) {
     const renderedPage = await renderPage(page);
@@ -137,7 +136,5 @@ async function deployModifiedPages(): Promise<void> {
   await updateLocalLastEditedTimes(modifiedPages);
 }
 
-// Check for changes every X milliseconds (based in the
-// `.env` environment variable).
 // Initial deployment attempt when the script is first run.
 void deployModifiedPages();

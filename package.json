@@ -1,6 +1,6 @@
 {
   "name": "blog",
-  "version": "1.0.0",
+  "version": "1.0.x0",
   "main": "dist/index.js",
   "repository": "https://github.com/yurixander/blog.git",
   "author": "yurixander <101931215+yurixander@users.noreply.github.com>",

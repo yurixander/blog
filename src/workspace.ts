@@ -56,35 +56,36 @@ export async function tryInitializeWorkspace(): Promise<boolean> {
   return true;
 }
 
-export function tryCleanFilesWorkspace() {
+export function tryCleanFilesOfWorkspace() {
   const workspacePath = requireEnvVariable(EnvironmentVariable.WorkspacePath);
 
-  if (!fs.existsSync(workspacePath)) {
-    return false;
-  }
+  if (fs.existsSync(workspacePath)) {
+    const files = fs.readdirSync(workspacePath);
 
-  const files = fs.readdirSync(workspacePath);
+    for (const file of files) {
+      if (file === ".git") {
+        continue;
+      }
 
-  for (const file of files) {
-    if (file === ".git") {
-      continue;
+      fs.unlinkSync(path.join(workspacePath, file));
     }
-    fs.unlinkSync(path.join(workspacePath, file));
+
+    return true;
   }
 
-  return true;
+  return false;
 }
 
 export function tryCleanWorkspace(): boolean {
   const workspacePath = requireEnvVariable(EnvironmentVariable.WorkspacePath);
 
-  if (!fs.existsSync(workspacePath)) {
-    return false;
+  if (fs.existsSync(workspacePath)) {
+    fs.rmSync(workspacePath, {recursive: true});
+
+    return true;
   }
 
-  fs.rmSync(workspacePath, {recursive: true});
-
-  return true;
+  return false;
 }
 
 export async function stageCommitAndPush(): Promise<void> {
@@ -94,7 +95,6 @@ export async function stageCommitAndPush(): Promise<void> {
 
   // TODO: In the future, use a more descriptive commit message. Perhaps base it on what page(s) were updated.
   await git.commit(dayjs().format());
-
   await git.push();
 }
 

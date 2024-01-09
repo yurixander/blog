@@ -83,12 +83,12 @@ export async function fetchBlockChildren(
 ): Promise<BlockObjectResponse[]> {
   const children = await getOrSetNotionClient().blocks.children.list({
     block_id: blockId,
-  })
-  const blocks: BlockObjectResponse[] = []
+  });
+  const blocks: BlockObjectResponse[] = [];
   for (const result of children.results) {
     if (isBlockObjectResponse(result)) {
-      blocks.push(result)
+      blocks.push(result);
     }
   }
-  return blocks
+  return blocks;
 }
