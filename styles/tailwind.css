@@ -23,15 +23,15 @@
 /* TODO: Optimize for CSS properties that are used in HTML. */
 
 h1 {
-  @apply text-3xl;
+  @apply text-3xl w-max;
 }
 
 h2 {
-  @apply text-2xl;
+  @apply text-2xl w-max;
 }
 
 h3 {
-  @apply text-xl;
+  @apply text-xl w-max;
 }
 
 a {

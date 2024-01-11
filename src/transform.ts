@@ -62,11 +62,11 @@ export function extractColor(color: string): string {
   const isBackgroundColor = backgroundColors.includes(color);
 
   if (isColor) {
-    return `class="text-${color}-600"`;
+    return `class="text-${color}-700"`;
   }
   if (isBackgroundColor) {
     // TODO: Handle here when is background-color
-    throw new Error("Not handle background color");
+    return `class="bg-${color.replace("_background", "")}-700"`;
   }
 
   throw new Error(`Unknown color : ${color}`);
@@ -195,6 +195,8 @@ const heading3Transformer = (
     transformRichTextToHtml,
     heading3.heading_3.rich_text
   );
+
+  /* TODO: Check why not have a color when have a text style */
 
   if (heading3.heading_3.is_toggleable) {
     if (heading3.has_children && children !== undefined) {
