@@ -13,8 +13,15 @@ const tailwindConfig = {
 export async function runPostcss(styles: string) {
   const tailwindPlugin = tailwindcss(tailwindConfig) as postcss.Plugin;
 
-  return postcss([autoprefixer, tailwindPlugin]).process(styles, {
-    from: "../styles/tailwind.css",
-    to: "../styles/styles.css",
-  }).css;
+  const tailwindInputPath = "./styles/tailwind.css";
+  const postCssOutputPath = "./.workspace/styles/styles.css";
+
+  const process = await postcss([autoprefixer, tailwindPlugin]).process(
+    styles,
+    {
+      from: tailwindInputPath,
+      to: postCssOutputPath,
+    }
+  );
+  return process.css;
 }

@@ -9,6 +9,7 @@ import {
   convertTitleToFilename,
   getOrSetLogger,
   requireEnvVariable,
+  runCssProcessors,
   runScript,
   validateHtml,
 } from "./util.js";
@@ -116,8 +117,8 @@ async function deploy(pages: PageObjectResponse[]): Promise<void> {
 
   void generateSitemap();
 
-  // Run tailwind processor
-  runScript("npx tailwindcss -i ./styles/tailwind.css -o ./styles/styles.css");
+  // Process css
+  runCssProcessors();
 
   await stageCommitAndPush();
   logger.info("Published changes to GitHub.");

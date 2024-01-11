@@ -23,6 +23,8 @@ export enum EnvironmentVariable {
   GithubPersonalAccessToken = "GIT_PERSONAL_ACCESS_TOKEN",
   GithubUsername = "GIT_USERNAME",
   GithubEmail = "GIT_EMAIL",
+  PostCssInputPath = "POSTCSS_INPUT",
+  PostCssOutputPath = "POSTCSS_OUTPUT",
 }
 
 export type Html = string;
@@ -145,4 +147,17 @@ export function runScript(script: string) {
 
     console.log(`stdout: ${stdout}`);
   });
+}
+
+export function runCssProcessors() {
+  // TODO: Convert these commands into a script or function.
+
+  const postCssInputPath = requireEnvVariable(
+    EnvironmentVariable.PostCssInputPath
+  );
+  const postCssOutputPath = requireEnvVariable(
+    EnvironmentVariable.PostCssOutputPath
+  );
+
+  runScript(`npx postcss ${postCssInputPath} -o ${postCssOutputPath}`);
 }
