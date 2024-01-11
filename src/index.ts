@@ -101,12 +101,9 @@ async function deploy(pages: PageObjectResponse[]): Promise<void> {
 
   tryCleanFilesWorkspace();
 
-  // TODO: Need to have a sitemap be the index file, and then create a new file for each blog post.
-
   for (const page of pages) {
     const renderedPage = await renderPage(page);
 
-    // TODO: Fix error message that push validateHTML
     void validateHtml(renderedPage.html);
 
     const filename = `${convertTitleToFilename(renderedPage.title)}.html`;

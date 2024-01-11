@@ -65,7 +65,6 @@ export function extractColor(color: string): string {
     return `class="text-${color}-700"`;
   }
   if (isBackgroundColor) {
-    // TODO: Handle here when is background-color
     return `class="bg-${color.replace("_background", "")}-700"`;
   }
 
