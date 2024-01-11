@@ -13,6 +13,7 @@ export type LayoutTemplateReplacements = {
 
 export type PostTemplateReplacements = {
   content: Html;
+  postTitle: string;
 };
 
 export enum HtmlTemplate {
@@ -25,14 +26,23 @@ export type RenderedPage = {
   html: Html;
 };
 
+export type CreateHtmlElementProps = {
+  tag: HtmlTag;
+  contents?: Html;
+  args?: string;
+  isSingle?: boolean;
+};
+
 type HtmlTag = keyof HTMLElementTagNameMap;
 
-export function createHtmlElement(
-  tag: HtmlTag,
-  contents: Html,
-  args?: string
-): Html {
-  return `<${tag}${args !== undefined ? ` ${args}` : ""}>${contents}</${tag}>`;
+export function createHtmlElement(props: CreateHtmlElementProps): Html {
+  if (props.isSingle) {
+    return `<${props.tag}${props.args !== undefined ? ` ${props.args}` : ""}>`;
+  }
+
+  return `<${props.tag}${props.args !== undefined ? ` ${props.args}` : ""}>${
+    props.contents
+  }</${props.tag}>`;
 }
 
 export function renderTemplate<
@@ -68,24 +78,26 @@ export async function renderPage(
       for (const child of children) {
         childrenHtmlContents += transformBlockToHtml(child);
       }
+
       pageHtmlContents += transformBlockToHtml(block, childrenHtmlContents);
     } else {
       pageHtmlContents += transformBlockToHtml(block);
     }
   }
 
-  const pageHtml = renderTemplate<PostTemplateReplacements>(HtmlTemplate.Page, {
-    content: pageHtmlContents,
-  });
-
   const css = loadStylesheet();
   let title = "Blog post" + Date.now();
 
   if (page.properties.title.type === "title") {
-    page.properties.title.title.forEach((titleProp) => {
+    for (const titleProp of page.properties.title.title) {
       title = titleProp.plain_text;
-    });
+    }
   }
+
+  const pageHtml = renderTemplate<PostTemplateReplacements>(HtmlTemplate.Page, {
+    content: pageHtmlContents,
+    postTitle: title,
+  });
 
   const html = renderTemplate<LayoutTemplateReplacements>(HtmlTemplate.Layout, {
     postTitle: title,

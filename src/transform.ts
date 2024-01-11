@@ -15,6 +15,7 @@ import {
 } from "@notionhq/client/build/src/api-endpoints.js";
 import {createHtmlElement} from "./template.js";
 import {todo, type Html} from "./util.js";
+import {backgroundColors, colors} from "./data.js";
 
 type Transformer<T extends BlockObjectResponse = never> = (block: T) => Html;
 
@@ -23,30 +24,6 @@ enum HeadingType {
   H2 = "h2",
   H3 = "h3",
 }
-
-const colors = [
-  "gray",
-  "brown",
-  "orange",
-  "yellow",
-  "green",
-  "blue",
-  "purple",
-  "pink",
-  "red",
-];
-
-const backgroundColors = [
-  "gray_background",
-  "brown_background",
-  "orange_background",
-  "yellow_background",
-  "green_background",
-  "blue_background",
-  "purple_background",
-  "pink_background",
-  "red_background",
-];
 
 export function transformBlockToHtml(
   block: BlockObjectResponse,
@@ -144,10 +121,17 @@ export function transformRichTextToHtml(richText: RichTextItemResponse): Html {
     const text = createHtmlElementList(listTag, richText.text.content);
 
     if (richText.text.link?.url !== undefined) {
-      return createHtmlElement("a", text, `href="${richText.text.link?.url}"`);
+      return createHtmlElement({
+        tag: "a",
+        contents: text,
+        args: `href="${richText.text.link?.url}"`,
+      });
     }
-
-    return createHtmlElement("span", text, args);
+    return createHtmlElement({
+      tag: "span",
+      contents: text,
+      args,
+    });
   }
 
   // TODO: Handle href.
@@ -164,7 +148,7 @@ const paragraphTransformer: Transformer<ParagraphBlockObjectResponse> = (
     paragraph.paragraph.rich_text
   );
 
-  return createHtmlElement("p", contents);
+  return createHtmlElement({tag: "p", contents});
 };
 
 export const heading1Transformer = (
@@ -182,7 +166,7 @@ export const heading1Transformer = (
     return createToggleableElement(contents, childrenParam, HeadingType.H1);
   }
 
-  return createHtmlElement("h1", contents);
+  return createHtmlElement({tag: "h1", contents});
 };
 
 export const heading2Transformer = (
@@ -200,7 +184,7 @@ export const heading2Transformer = (
     }
     return createToggleableElement(contents, "", HeadingType.H2);
   }
-  return createHtmlElement("h2", contents);
+  return createHtmlElement({tag: "h2", contents});
 };
 
 const heading3Transformer = (
@@ -218,7 +202,7 @@ const heading3Transformer = (
     }
     return createToggleableElement(contents, "", HeadingType.H3);
   }
-  return createHtmlElement("h3", contents);
+  return createHtmlElement({tag: "h3", contents});
 };
 
 const bulletedListItemTransformer: Transformer<
@@ -229,7 +213,7 @@ const bulletedListItemTransformer: Transformer<
     bulletedListItem.bulleted_list_item.rich_text
   );
 
-  return createHtmlElement("li", contents);
+  return createHtmlElement({tag: "li", contents});
 };
 
 const quoteTransformer: Transformer<QuoteBlockObjectResponse> = (quote) => {
@@ -238,7 +222,7 @@ const quoteTransformer: Transformer<QuoteBlockObjectResponse> = (quote) => {
     quote.quote.rich_text
   );
 
-  return createHtmlElement("blockquote", contents);
+  return createHtmlElement({tag: "blockquote", contents});
 };
 
 const numberedListItemTransformer: Transformer<
@@ -251,14 +235,14 @@ const numberedListItemTransformer: Transformer<
     numberedListItem.numbered_list_item.rich_text
   );
 
-  const item = createHtmlElement("li", contents);
-  const container = createHtmlElement("ol", item);
+  const item = createHtmlElement({tag: "li", contents});
+  const container = createHtmlElement({tag: "ol", contents: item});
 
   return container;
 };
 
 const dividerTransformer: Transformer<DividerBlockObjectResponse> = () => {
-  return createHtmlElement("hr", "");
+  return createHtmlElement({tag: "hr", isSingle: true});
 };
 
 const todoTransformer: Transformer<ToDoBlockObjectResponse> = (todo) => {
@@ -270,54 +254,66 @@ const todoTransformer: Transformer<ToDoBlockObjectResponse> = (todo) => {
     todo.to_do.rich_text
   );
 
-  const checkbox = createHtmlElement(
-    "input",
-    "",
-    `type="checkbox" ${isChecked} disable`
-  );
+  const checkbox = createHtmlElement({
+    tag: "input",
+    isSingle: true,
+    args: `type="checkbox" ${isChecked} disable`,
+  });
 
-  const text = createHtmlElement(textTag, caption);
+  const text = createHtmlElement({tag: textTag, contents: caption});
 
-  const checkboxContainer = createHtmlElement(
-    "div",
-    `${checkbox}${text}`,
-    `class="checkbox-container"`
-  );
+  const checkboxContainer = createHtmlElement({
+    tag: "div",
+    contents: `${checkbox}${text}`,
+    args: `class="checkbox-container"`,
+  });
 
   return checkboxContainer;
 };
 
 const imageTransformer: Transformer<ImageBlockObjectResponse> = (image) => {
+  let description: string = "";
+
   const contents = transformToHtmlString(
     transformRichTextToHtml,
     image.image.caption
   );
 
-  if (image.image.type === "external") {
-    const imageHtml = createHtmlElement(
-      "img",
-      "",
-      `src="${image.image.external.url}"`
-    );
+  for (const word of image.image.caption) {
+    description += " " + word.plain_text;
+  }
 
-    const caption = createHtmlElement("p", contents);
-    const container = createHtmlElement("div", `${imageHtml}${caption}`);
+  if (image.image.type === "external") {
+    const imageHtml = createHtmlElement({
+      tag: "img",
+      isSingle: true,
+      args: `src="${image.image.external.url}" alt="${description}"`,
+    });
+
+    const caption = createHtmlElement({tag: "p", contents});
+    const container = createHtmlElement({
+      tag: "div",
+      contents: `${imageHtml}${caption}`,
+    });
 
     return container;
   } else if (image.image.type === "file") {
-    const imageHtml = createHtmlElement(
-      "img",
-      "",
-      `src="${image.image.file.url}"`
-    );
+    const imageHtml = createHtmlElement({
+      tag: "img",
+      isSingle: true,
+      args: `src="${image.image.file.url}" alt="${description}"`,
+    });
 
-    const caption = createHtmlElement("p", contents);
-    const container = createHtmlElement("div", `${imageHtml}${caption}`);
+    const caption = createHtmlElement({tag: "p", contents});
+    const container = createHtmlElement({
+      tag: "div",
+      contents: `${imageHtml}${caption}`,
+    });
 
     return container;
   }
 
-  return createHtmlElement("img", contents);
+  return createHtmlElement({tag: "img", contents});
 };
 
 const calloutTransformer: Transformer<CalloutBlockObjectResponse> = (
@@ -340,15 +336,19 @@ const calloutTransformer: Transformer<CalloutBlockObjectResponse> = (
     throw new Error(`Icon type is undefined`);
   }
 
-  const icon = createHtmlElement("img", "", `class="icon" src="${iconSrc}"`);
+  const icon = createHtmlElement({
+    tag: "img",
+    isSingle: true,
+    args: `class="icon" src="${iconSrc}" alt="Icon about content"`,
+  });
 
-  const text = createHtmlElement("p", richText);
+  const text = createHtmlElement({tag: "p", contents: richText});
 
-  const container = createHtmlElement(
-    "div",
-    `${icon}${text}`,
-    `class="callout-container"`
-  );
+  const container = createHtmlElement({
+    tag: "div",
+    contents: `${icon}${text}`,
+    args: `class="callout-container"`,
+  });
 
   return container;
 };

@@ -6,6 +6,7 @@ import {
   type PartialDatabaseObjectResponse,
   type PartialPageObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints.js";
+import {HtmlValidate} from "html-validate";
 import moment from "moment-timezone";
 import winston, {type Logger} from "winston";
 
@@ -52,6 +53,23 @@ export function getOrSetLogger(): Logger {
   }
 
   return loggerSingleton;
+}
+
+export async function validateHtml(html: Html) {
+  const htmlValidate = new HtmlValidate();
+  const report = await htmlValidate.validateString(html);
+  const logger = getOrSetLogger();
+
+  if (!report.valid) {
+    logger.info("Errors: ", report.errorCount);
+    for (const result of report.results) {
+      for (const message of result.messages) {
+        logger.info(
+          `Line ${message.line}, Column ${message.column}: ${message.message}`
+        );
+      }
+    }
+  }
 }
 
 export function requireEnvVariable(name: EnvironmentVariable): string {

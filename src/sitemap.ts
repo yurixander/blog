@@ -67,12 +67,12 @@ export async function generateSitemap() {
   let contentHtml: Html = "";
 
   for (const postProp of postProps) {
-    const linkContent = createHtmlElement(
-      "a",
-      postProp.name,
-      `href="${postProp.route}"`
-    );
-    contentHtml += createHtmlElement("li", linkContent);
+    const linkContent = createHtmlElement({
+      tag: "a",
+      contents: postProp.name,
+      args: `href="${postProp.route}"`,
+    });
+    contentHtml += createHtmlElement({tag: "li", contents: linkContent});
   }
 
   const html = renderTemplate<IndexTemplateReplacements>(HtmlTemplate.Index, {

@@ -9,10 +9,11 @@ import {
   convertTitleToFilename,
   getOrSetLogger,
   requireEnvVariable,
+  validateHtml,
 } from "./util.js";
 import {
   stageCommitAndPush,
-  tryCleanFilesOfWorkspace,
+  tryCleanFilesWorkspace,
   tryCleanWorkspace,
   tryInitializeWorkspace,
   writeWorkspaceFile,
@@ -89,7 +90,6 @@ async function deploy(pages: PageObjectResponse[]): Promise<void> {
   // TODO: Show a list of the modified pages' titles.
   logger.info(`Deploying ${pages.length} modified page(s).`);
 
-  // TODO: Merge tryCleanWorkspace with tryCleanFilesOfWorkspace
   tryCleanWorkspace();
 
   assert(
@@ -97,12 +97,15 @@ async function deploy(pages: PageObjectResponse[]): Promise<void> {
     "Workspace should be successfully initialized after cleaning."
   );
 
-  tryCleanFilesOfWorkspace();
+  tryCleanFilesWorkspace();
+
+  // TODO: Need to have a sitemap be the index file, and then create a new file for each blog post.
 
   for (const page of pages) {
     const renderedPage = await renderPage(page);
 
-    // TODO: Need to validate both HTML and CSS, likely will need to use a library for that.
+    // TODO: Fix error message that push validateHTML
+    void validateHtml(renderedPage.html);
 
     const filename = `${convertTitleToFilename(renderedPage.title)}.html`;
 
@@ -136,5 +139,7 @@ async function deployModifiedPages(): Promise<void> {
   await updateLocalLastEditedTimes(modifiedPages);
 }
 
+// Check for changes every X milliseconds (based in the
+// `.env` environment variable).
 // Initial deployment attempt when the script is first run.
 void deployModifiedPages();
