@@ -9,6 +9,7 @@ import {
 import {HtmlValidate} from "html-validate";
 import moment from "moment-timezone";
 import winston, {type Logger} from "winston";
+import {exec} from "child_process";
 
 export enum EnvironmentVariable {
   SiteTitle = "SITE_TITLE",
@@ -128,4 +129,20 @@ export function convertTitleToFilename(string: string): string {
       // Trim leading and trailing hyphens
       .replace(/^-*|-*$/g, "")
   );
+}
+
+export function runScript(script: string) {
+  exec(script, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`error: ${error.message}`);
+      return;
+    }
+
+    if (stderr) {
+      console.error(`stderr: ${stderr}`);
+      return;
+    }
+
+    console.log(`stdout: ${stdout}`);
+  });
 }
