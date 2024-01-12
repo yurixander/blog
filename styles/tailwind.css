@@ -39,21 +39,16 @@ a {
 }
 
 * {
-  box-sizing: border-box;
+  @apply box-border;
 }
 
 html,
 body {
-  color: #fff;
+  @apply text-white;
 }
 
 body {
-  padding: 100px;
-  display: flex;
-  flex-direction: column;
-  gap: 50px;
-  font-family: sans-serif;
-  background-color: #191919;
+  @apply flex p-24 flex-col gap-12 bg-bgColorDefault;
 }
 
 li {
@@ -89,10 +84,7 @@ input[checkbox]:checked {
 }
 
 details > summary {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  list-style: none;
+  @apply flex items-center cursor-pointer list-none;
 }
 
 details > summary::-webkit-details-marker {
