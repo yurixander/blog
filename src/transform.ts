@@ -154,7 +154,7 @@ const paragraphTransformer: Transformer<ParagraphBlockObjectResponse> = (
 export const heading1Transformer = (
   heading1: Heading1BlockObjectResponse,
   children?: Html
-) => {
+): Html => {
   const contents = transformToHtmlString(
     transformRichTextToHtml,
     heading1.heading_1.rich_text
@@ -172,7 +172,7 @@ export const heading1Transformer = (
 export const heading2Transformer = (
   heading2: Heading2BlockObjectResponse,
   children?: Html
-) => {
+): Html => {
   const contents = transformToHtmlString(
     transformRichTextToHtml,
     heading2.heading_2.rich_text
@@ -190,7 +190,7 @@ export const heading2Transformer = (
 const heading3Transformer = (
   heading3: Heading3BlockObjectResponse,
   children?: Html
-) => {
+): Html => {
   const contents = transformToHtmlString(
     transformRichTextToHtml,
     heading3.heading_3.rich_text
@@ -249,7 +249,7 @@ const dividerTransformer: Transformer<DividerBlockObjectResponse> = () => {
 
 const todoTransformer: Transformer<ToDoBlockObjectResponse> = (todo) => {
   const isChecked = todo.to_do.checked ? "checked" : "";
-  const textTag = isChecked ? "del" : "span";
+  const textTag = isChecked.length > 0 ? "del" : "span";
 
   const caption = transformToHtmlString(
     transformRichTextToHtml,
@@ -355,7 +355,7 @@ const calloutTransformer: Transformer<CalloutBlockObjectResponse> = (
   return container;
 };
 
-export function extractTitle(page: PageObjectResponse) {
+export function extractTitle(page: PageObjectResponse): string {
   let title = "Blog post" + Date.now();
 
   if (page.properties.title.type === "title") {

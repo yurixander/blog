@@ -10,7 +10,7 @@ const tailwindConfig = {
   plugins: [],
 };
 
-export async function runPostcss(styles: string) {
+export async function runPostcss(styles: string): Promise<string> {
   const tailwindPlugin = tailwindcss(tailwindConfig) as postcss.Plugin;
 
   const tailwindInputPath = "./styles/tailwind.css";

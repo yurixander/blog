@@ -58,7 +58,7 @@ export async function tryInitializeWorkspace(): Promise<boolean> {
   return tryCleanFilesWorkspace();
 }
 
-export function tryCleanFilesWorkspace() {
+export function tryCleanFilesWorkspace(): boolean {
   const workspacePath = requireEnvVariable(EnvironmentVariable.WorkspacePath);
 
   if (!fs.existsSync(workspacePath)) {

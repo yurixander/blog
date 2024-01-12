@@ -9,17 +9,10 @@
   "[css]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "stylelint.snippet": [
-    "css",
-    "less",
-    "postcss"
-  ],
-  "stylelint.validate": [
-    "css",
-    "less",
-    "postcss"
-  ],
+  "stylelint.snippet": ["css", "less", "postcss"],
+  "stylelint.validate": ["css", "less", "postcss"],
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  "cSpell.words": ["linebreak"]
 }

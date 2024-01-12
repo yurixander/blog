@@ -3,44 +3,18 @@
     "browser": true,
     "es2021": true
   },
-  "extends": ["standard-with-typescript", "eslint-config-prettier"],
+  "extends": ["standard-with-typescript", "prettier"],
   "parserOptions": {
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
   "rules": {
-    "@typescript-eslint/quotes": "off",
-    "@typescript-eslint/no-unused-vars": "warn",
-    "@typescript-eslint/explicit-function-return-type": "off",
-    "@typescript-eslint/space-before-function-paren": "off",
-    "@typescript-eslint/strict-boolean-expressions": "off",
     "@typescript-eslint/consistent-type-definitions": "off",
-    "operator-linebreak": "off",
-    "multiline-ternary": "off",
-    "react/no-children-prop": "off",
-    "prefer-regex-literals": "off",
-    "no-useless-escape": "off",
-    "@typescript-eslint/no-non-null-assertion": "warn",
-    "@typescript-eslint/no-floating-promises": "warn",
-    "no-new": "off",
-    "no-return-await": "warn",
-    "@typescript-eslint/return-await": "warn",
-    "no-unused-expressions": "off",
-    "@typescript-eslint/no-unused-expressions": "warn",
-    "@typescript-eslint/no-misused-promises": "warn",
-    "@typescript-eslint/restrict-plus-operands": "warn",
-    "@typescript-eslint/no-base-to-string": "warn",
     "brace-style": [
       "error",
       "1tbs",
       {
         "allowSingleLine": true
-      }
-    ],
-    "newline-per-chained-call": [
-      "warn",
-      {
-        "ignoreChainWithDepth": 2
       }
     ]
   }

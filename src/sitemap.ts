@@ -57,7 +57,7 @@ function extractPostsProps(): PostProp[] {
   return postProps;
 }
 
-export async function generateSitemap() {
+export async function generateSitemap(): Promise<void> {
   const logger = getOrSetLogger();
 
   const title = requireEnvVariable(EnvironmentVariable.SiteTitle);

@@ -37,7 +37,7 @@ export function getOrSetLogger(): Logger {
       EnvironmentVariable.LoggerTimezone
     );
 
-    const timestampFormat = () =>
+    const timestampFormat = (): string =>
       moment().tz(loggerTimezone).format("YYYY-MM-DD hh:mm:ss A");
 
     loggerSingleton = winston.createLogger({
@@ -58,7 +58,7 @@ export function getOrSetLogger(): Logger {
   return loggerSingleton;
 }
 
-export async function validateHtml(html: Html) {
+export async function validateHtml(html: Html): Promise<void> {
   const htmlValidate = new HtmlValidate();
   const report = await htmlValidate.validateString(html);
   const logger = getOrSetLogger();
@@ -133,14 +133,14 @@ export function convertTitleToFilename(string: string): string {
   );
 }
 
-export function runScript(script: string) {
+export function runScript(script: string): void {
   exec(script, (error, stdout, stderr) => {
-    if (error) {
+    if (error != null) {
       console.error(`error: ${error.message}`);
       return;
     }
 
-    if (stderr) {
+    if (stderr.length > 0) {
       console.error(`stderr: ${stderr}`);
       return;
     }
@@ -149,7 +149,7 @@ export function runScript(script: string) {
   });
 }
 
-export function runCssProcessors() {
+export function runCssProcessors(): void {
   // TODO: Convert these commands into a script or function.
 
   const postCssInputPath = requireEnvVariable(

@@ -3,7 +3,7 @@ import fs from "fs";
 import handlebars from "handlebars";
 import {fetchBlockChildren, fetchPageContents} from "./notionApi.js";
 import {extractTitle, transformBlockToHtml} from "./transform.js";
-import {isBlockObjectResponse, runCssProcessors, type Html} from "./util.js";
+import {isBlockObjectResponse, type Html} from "./util.js";
 
 export type LayoutTemplateReplacements = {
   postTitle: string;
@@ -36,7 +36,7 @@ export type CreateHtmlElementProps = {
 type HtmlTag = keyof HTMLElementTagNameMap;
 
 export function createHtmlElement(props: CreateHtmlElementProps): Html {
-  if (props.isSingle) {
+  if (props.isSingle ?? false) {
     return `<${props.tag}${props.args !== undefined ? ` ${props.args}` : ""}>`;
   }
 
