@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./templates/*.html", ".workspace/test-post.html"],
+  content: ["./templates/*.html", "./.workspace/*.html"],
   theme: {
     extend: {
       backgroundImage: {

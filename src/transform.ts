@@ -1,4 +1,5 @@
 import {
+  type PageObjectResponse,
   type BlockObjectResponse,
   type BulletedListItemBlockObjectResponse,
   type CalloutBlockObjectResponse,
@@ -353,3 +354,15 @@ const calloutTransformer: Transformer<CalloutBlockObjectResponse> = (
 
   return container;
 };
+
+export function extractTitle(page: PageObjectResponse) {
+  let title = "Blog post" + Date.now();
+
+  if (page.properties.title.type === "title") {
+    for (const titleProp of page.properties.title.title) {
+      title = titleProp.plain_text;
+    }
+  }
+
+  return title;
+}

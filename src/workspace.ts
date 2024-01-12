@@ -21,6 +21,8 @@ function getOrSetGit(): SimpleGit {
 export async function tryInitializeWorkspace(): Promise<boolean> {
   const workspacePath = requireEnvVariable(EnvironmentVariable.WorkspacePath);
 
+  tryCleanWorkspace();
+
   if (fs.existsSync(workspacePath)) {
     return false;
   }
@@ -53,7 +55,7 @@ export async function tryInitializeWorkspace(): Promise<boolean> {
   await git.addConfig("user.name", githubUsername, false, "local");
   await git.addConfig("user.email", githubEmail, false, "local");
 
-  return true;
+  return tryCleanFilesWorkspace();
 }
 
 export function tryCleanFilesWorkspace() {

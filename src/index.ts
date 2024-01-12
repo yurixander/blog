@@ -10,17 +10,15 @@ import {
   getOrSetLogger,
   requireEnvVariable,
   runCssProcessors,
-  runScript,
   validateHtml,
 } from "./util.js";
 import {
   stageCommitAndPush,
-  tryCleanFilesWorkspace,
-  tryCleanWorkspace,
   tryInitializeWorkspace,
   writeWorkspaceFile,
 } from "./workspace.js";
 import {generateSitemap} from "./sitemap.js";
+import {extractTitle} from "./transform.js";
 
 // Load environment variables from `.env` file.
 config();
@@ -89,17 +87,18 @@ async function checkForChanges(): Promise<boolean> {
 async function deploy(pages: PageObjectResponse[]): Promise<void> {
   const logger = getOrSetLogger();
 
-  // TODO: Show a list of the modified pages' titles.
   logger.info(`Deploying ${pages.length} modified page(s).`);
 
-  tryCleanWorkspace();
+  for (const page of pages) {
+    const title = extractTitle(page);
+
+    logger.info(`${title} modified page`);
+  }
 
   assert(
     await tryInitializeWorkspace(),
     "Workspace should be successfully initialized after cleaning."
   );
-
-  tryCleanFilesWorkspace();
 
   for (const page of pages) {
     const renderedPage = await renderPage(page);

@@ -2,8 +2,8 @@ import {type PageObjectResponse} from "@notionhq/client/build/src/api-endpoints.
 import fs from "fs";
 import handlebars from "handlebars";
 import {fetchBlockChildren, fetchPageContents} from "./notionApi.js";
-import {transformBlockToHtml} from "./transform.js";
-import {isBlockObjectResponse, type Html} from "./util.js";
+import {extractTitle, transformBlockToHtml} from "./transform.js";
+import {isBlockObjectResponse, runCssProcessors, type Html} from "./util.js";
 
 export type LayoutTemplateReplacements = {
   postTitle: string;
@@ -57,7 +57,7 @@ export function renderTemplate<
 
 export function loadStylesheet(): Html {
   // TODO: Use PostCSS package to programmatically process CSS, along with some plugins like autoprefixer, and minify.
-  return fs.readFileSync("styles/styles.css", "utf-8");
+  return "";
 }
 
 export async function renderPage(
@@ -86,13 +86,7 @@ export async function renderPage(
   }
 
   const css = loadStylesheet();
-  let title = "Blog post" + Date.now();
-
-  if (page.properties.title.type === "title") {
-    for (const titleProp of page.properties.title.title) {
-      title = titleProp.plain_text;
-    }
-  }
+  const title = extractTitle(page);
 
   const pageHtml = renderTemplate<PostTemplateReplacements>(HtmlTemplate.Page, {
     content: pageHtmlContents,
