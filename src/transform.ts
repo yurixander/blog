@@ -15,7 +15,7 @@ import {
   type ToDoBlockObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints.js";
 import {createHtmlElement} from "./template.js";
-import {todo, type Html} from "./util.js";
+import {tailwindClassMerge, todo, type Html} from "./util.js";
 import {backgroundColors, colors} from "./data.js";
 
 type Transformer<T extends BlockObjectResponse = never> = (block: T) => Html;
@@ -65,8 +65,14 @@ export function extractColor(color: string): string {
   if (isColor) {
     return `class="text-${color}"`;
   }
+
   if (isBackgroundColor) {
-    return `class="bg-${color.replace("_background", "")}Bg"`;
+    const bgColor = color.replace("_background", "");
+
+    const bgDark = `dark:bg-${bgColor}`;
+    const bgLight = `bg-${bgColor}`;
+
+    return tailwindClassMerge(bgLight, bgDark);
   }
 
   throw new Error(`Unknown color : ${color}`);

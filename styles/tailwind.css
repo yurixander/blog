@@ -44,11 +44,11 @@ a {
 
 html,
 body {
-  @apply text-default;
+  @apply font-sans text-dark bg-defaultBg dark:text-white dark:bg-defaultBgDark;
 }
 
 body {
-  @apply flex p-24 flex-col gap-12 bg-bgColorDefault;
+  @apply flex p-24 flex-col gap-1;
 }
 
 li {
@@ -68,7 +68,7 @@ input[type="checkbox"] {
 }
 
 input[type="checkbox"]:checked {
-  @apply border-none bg-checkIcon bg-blue;
+  @apply border-none bg-checkIcon bg-blueCheckbox;
 }
 
 .checkbox-container {
@@ -76,7 +76,7 @@ input[type="checkbox"]:checked {
 }
 
 .callout-container {
-  @apply flex gap-2 p-2 rounded-md bg-bgColorDefault;
+  @apply flex gap-2 p-2 rounded-md bg-calloutBgColor dark:bg-calloutBgColorDark;
 }
 
 .callout-container > .icon {

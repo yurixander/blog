@@ -161,3 +161,7 @@ export function runCssProcessors(): void {
 
   runScript(`npx postcss ${postCssInputPath} -o ${postCssOutputPath}`);
 }
+
+export function tailwindClassMerge(...args: string[]): string {
+  return `class="${args.join(" ")}"`;
+}
