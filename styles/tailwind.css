@@ -44,7 +44,7 @@ a {
 
 html,
 body {
-  @apply text-white;
+  @apply text-default;
 }
 
 body {
@@ -63,12 +63,12 @@ blockquote {
   @apply border-l-2 ps-2 p-1;
 }
 
-input[checkbox] {
+input[type="checkbox"] {
   @apply size-3.5 appearance-none border-2;
 }
 
-input[checkbox]:checked {
-  @apply border-none bg-checkIcon bg-blue-700;
+input[type="checkbox"]:checked {
+  @apply border-none bg-checkIcon bg-blue;
 }
 
 .checkbox-container {
@@ -76,7 +76,7 @@ input[checkbox]:checked {
 }
 
 .callout-container {
-  @apply flex gap-2 p-2 rounded-md bg-neutral-700;
+  @apply flex gap-2 p-2 rounded-md bg-bgColorDefault;
 }
 
 .callout-container > .icon {

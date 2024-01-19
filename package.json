@@ -11,8 +11,7 @@
     "prepare": "husky install",
     "build": "tsc --build .",
     "build:css": "npx postcss styles/* -o dist/compiled-styles.css",
-    "start": "yarn build && node dist/index.js",
-    "tailwind": "npx tailwindcss -i ./styles/tailwind.css -o ./styles/styles.css"
+    "start": "yarn build && node dist/index.js"
   },
   "dependencies": {
     "@notionhq/client": "^2.2.14",
@@ -39,6 +38,7 @@
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-n": "^15.0.0 || ^16.0.0 ",
     "eslint-plugin-promise": "^6.1.1",
+    "eslint-plugin-tailwindcss": "^3.14.0",
     "husky": "^8.0.3",
     "postcss": "^8.4.33",
     "postcss-cli": "^11.0.0",

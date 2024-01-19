@@ -63,10 +63,10 @@ export function extractColor(color: string): string {
   const isBackgroundColor = backgroundColors.includes(color);
 
   if (isColor) {
-    return `class="text-${color}-700"`;
+    return `class="text-${color}"`;
   }
   if (isBackgroundColor) {
-    return `class="bg-${color.replace("_background", "")}-700"`;
+    return `class="bg-${color.replace("_background", "")}Bg"`;
   }
 
   throw new Error(`Unknown color : ${color}`);
@@ -259,7 +259,7 @@ const todoTransformer: Transformer<ToDoBlockObjectResponse> = (todo) => {
   const checkbox = createHtmlElement({
     tag: "input",
     isSingle: true,
-    args: `type="checkbox" ${isChecked} disable`,
+    args: `type="checkbox" ${isChecked} disabled`,
   });
 
   const text = createHtmlElement({tag: textTag, contents: caption});
