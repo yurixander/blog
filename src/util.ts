@@ -9,7 +9,6 @@ import {
 import {HtmlValidate} from "html-validate";
 import moment from "moment-timezone";
 import winston, {type Logger} from "winston";
-import {exec} from "child_process";
 
 export enum EnvironmentVariable {
   SiteTitle = "SITE_TITLE",
@@ -131,35 +130,6 @@ export function convertTitleToFilename(string: string): string {
       // Trim leading and trailing hyphens
       .replace(/^-*|-*$/g, "")
   );
-}
-
-export function runScript(script: string): void {
-  exec(script, (error, stdout, stderr) => {
-    if (error != null) {
-      console.error(`error: ${error.message}`);
-      return;
-    }
-
-    if (stderr.length > 0) {
-      console.error(`stderr: ${stderr}`);
-      return;
-    }
-
-    console.log(`stdout: ${stdout}`);
-  });
-}
-
-export function runCssProcessors(): void {
-  // TODO: Convert these commands into a script or function.
-
-  const postCssInputPath = requireEnvVariable(
-    EnvironmentVariable.PostCssInputPath
-  );
-  const postCssOutputPath = requireEnvVariable(
-    EnvironmentVariable.PostCssOutputPath
-  );
-
-  runScript(`npx postcss ${postCssInputPath} -o ${postCssOutputPath}`);
 }
 
 export function tailwindClassMerge(...args: string[]): string {

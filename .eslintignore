@@ -10,5 +10,5 @@ package.json
 LICENSE
 lastEditedTime
 commitlint.config.ts
-tailwind.config.js
+tailwind.config.ts
 postcss.config.ts

@@ -16,7 +16,7 @@ import {
 } from "@notionhq/client/build/src/api-endpoints.js";
 import {createHtmlElement} from "./template.js";
 import {tailwindClassMerge, todo, type Html} from "./util.js";
-import {backgroundColors, colors} from "./data.js";
+import {backgroundColors, colors} from "./constants.js";
 
 type Transformer<T extends BlockObjectResponse = never> = (block: T) => Html;
 

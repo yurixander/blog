@@ -1,6 +1,4 @@
-/** @type {import('tailwindcss').Config} */
-export default {
-  darkMode: "media",
+export const tailwindConfig = {
   content: ["./templates/*.html", "./.workspace/*.html"],
   theme: {
     extend: {
@@ -32,9 +30,6 @@ export default {
         calloutBgColorDark: "#393939",
       },
     },
-    fontFamily: {
-      sans: ["sans-serif"],
-    },
     colors: {
       white: "#D5D5D5",
       dark: "#191919",
@@ -51,6 +46,29 @@ export default {
       blueCheckbox: "#1865e0",
     },
   },
-
   plugins: [],
 };
+
+export const colors = [
+  "gray",
+  "brown",
+  "orange",
+  "yellow",
+  "green",
+  "blue",
+  "purple",
+  "pink",
+  "red",
+];
+
+export const backgroundColors = [
+  "gray_background",
+  "brown_background",
+  "orange_background",
+  "yellow_background",
+  "green_background",
+  "blue_background",
+  "purple_background",
+  "pink_background",
+  "red_background",
+];

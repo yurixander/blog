@@ -9,7 +9,6 @@ import {
   convertTitleToFilename,
   getOrSetLogger,
   requireEnvVariable,
-  runCssProcessors,
   validateHtml,
 } from "./util.js";
 import {
@@ -19,6 +18,7 @@ import {
 } from "./workspace.js";
 import {generateSitemap} from "./sitemap.js";
 import {extractTitle} from "./transform.js";
+import {runPostcss} from "./postcss.js";
 
 // Load environment variables from `.env` file.
 config();
@@ -114,7 +114,7 @@ async function deploy(pages: PageObjectResponse[]): Promise<void> {
   void generateSitemap();
 
   // Process css
-  runCssProcessors();
+  void runPostcss();
 
   await stageCommitAndPush();
   logger.info("Published changes to GitHub.");
