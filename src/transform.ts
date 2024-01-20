@@ -250,7 +250,6 @@ function numberedListItemTransformer(
   const item = createHtmlElement({tag: "li", contents});
 
   if (numberedList !== undefined) {
-    console.log(numberedList);
     if (inList) {
       numberedList.push(item);
     } else {
