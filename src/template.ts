@@ -66,9 +66,24 @@ export async function renderPage(
   const blocks = await fetchPageContents(page.id);
   let pageHtmlContents: Html = "";
 
+  const numberedList: Html[] = [];
+  let inList = false;
+
   for (const block of blocks) {
     if (!isBlockObjectResponse(block)) {
       continue;
+    }
+
+    if (numberedList.length > 0 && !inList) {
+      inList = true;
+    }
+
+    if (block.type !== "numbered_list_item" && numberedList.length > 0) {
+      inList = false;
+      numberedList.push("</ol>");
+
+      pageHtmlContents += numberedList.join("");
+      numberedList.length = 0;
     }
 
     if (block.has_children) {
@@ -76,12 +91,21 @@ export async function renderPage(
       let childrenHtmlContents: Html = "";
 
       for (const child of children) {
-        childrenHtmlContents += transformBlockToHtml(child);
+        childrenHtmlContents += transformBlockToHtml(
+          child,
+          inList,
+          numberedList
+        );
       }
 
-      pageHtmlContents += transformBlockToHtml(block, childrenHtmlContents);
+      pageHtmlContents += transformBlockToHtml(
+        block,
+        inList,
+        numberedList,
+        childrenHtmlContents
+      );
     } else {
-      pageHtmlContents += transformBlockToHtml(block);
+      pageHtmlContents += transformBlockToHtml(block, inList, numberedList);
     }
   }
 

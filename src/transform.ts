@@ -28,6 +28,8 @@ enum HeadingType {
 
 export function transformBlockToHtml(
   block: BlockObjectResponse,
+  inList: boolean,
+  numberedList?: Html[],
   children?: Html
 ): Html {
   switch (block.type) {
@@ -44,7 +46,7 @@ export function transformBlockToHtml(
     case "quote":
       return quoteTransformer(block);
     case "numbered_list_item":
-      return numberedListItemTransformer(block);
+      return numberedListItemTransformer(block, inList, numberedList);
     case "divider":
       return dividerTransformer(block);
     case "to_do":
@@ -233,9 +235,11 @@ const quoteTransformer: Transformer<QuoteBlockObjectResponse> = (quote) => {
   return createHtmlElement({tag: "blockquote", contents});
 };
 
-const numberedListItemTransformer: Transformer<
-  NumberedListItemBlockObjectResponse
-> = (numberedListItem) => {
+function numberedListItemTransformer(
+  numberedListItem: NumberedListItemBlockObjectResponse,
+  inList: boolean,
+  numberedList?: Html[]
+): Html {
   // TODO: This output should be encapsulated with `<ol>`.
 
   const contents = transformToHtmlString(
@@ -244,10 +248,18 @@ const numberedListItemTransformer: Transformer<
   );
 
   const item = createHtmlElement({tag: "li", contents});
-  const container = createHtmlElement({tag: "ol", contents: item});
 
-  return container;
-};
+  if (numberedList !== undefined) {
+    console.log(numberedList);
+    if (inList) {
+      numberedList.push(item);
+    } else {
+      numberedList.push(`<ol>${item}`);
+    }
+  }
+
+  return "";
+}
 
 const dividerTransformer: Transformer<DividerBlockObjectResponse> = () => {
   return createHtmlElement({tag: "hr", isSingle: true});
