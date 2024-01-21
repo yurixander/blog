@@ -14,7 +14,7 @@ import {
 import {
   stageCommitAndPush,
   tryInitializeWorkspace,
-  writeWorkspaceFile,
+  writePost,
 } from "./workspace.js";
 import {generateSitemap} from "./sitemap.js";
 import {extractTitle} from "./transform.js";
@@ -107,7 +107,7 @@ async function deploy(pages: PageObjectResponse[]): Promise<void> {
 
     const filename = `${convertTitleToFilename(renderedPage.title)}.html`;
 
-    await writeWorkspaceFile(filename, renderedPage.html);
+    await writePost(filename, renderedPage.html);
     logger.info(`Wrote: ${filename}.`);
   }
 

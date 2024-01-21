@@ -42,15 +42,23 @@ export function renderTemplate<T extends IndexTemplateReplacements>(
 
 function extractPostsProps(): PostProp[] {
   const workspacePath = requireEnvVariable(EnvironmentVariable.WorkspacePath);
+  const workspacePostsPath = requireEnvVariable(
+    EnvironmentVariable.WorkspacePostFolder
+  );
 
   const postProps: PostProp[] = [];
-  const files = fs.readdirSync(workspacePath);
+  const files = fs.readdirSync(workspacePostsPath);
+  const postsPath = workspacePostsPath.replace(workspacePath + "/", "");
 
   for (const file of files) {
-    const relativePath = path.join(workspacePath, file);
+    const relativePath = path.join(workspacePostsPath, file);
+    const relativeFilePath = path.join(postsPath, file);
 
     if (fs.statSync(relativePath).isFile()) {
-      postProps.push({name: file.replace(".html", ""), route: file});
+      postProps.push({
+        name: file.replace(".html", ""),
+        route: relativeFilePath,
+      });
     }
   }
 

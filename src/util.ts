@@ -9,6 +9,7 @@ import {
 import {HtmlValidate} from "html-validate";
 import moment from "moment-timezone";
 import winston, {type Logger} from "winston";
+import {mkdir} from "fs";
 
 export enum EnvironmentVariable {
   SiteTitle = "SITE_TITLE",
@@ -24,6 +25,7 @@ export enum EnvironmentVariable {
   GithubEmail = "GIT_EMAIL",
   PostCssInputPath = "POSTCSS_INPUT",
   PostCssOutputPath = "POSTCSS_OUTPUT",
+  WorkspacePostFolder = "WORKSPACE_POST_FOLDER",
 }
 
 export type Html = string;
@@ -134,4 +136,12 @@ export function convertTitleToFilename(string: string): string {
 
 export function tailwindClassMerge(...args: string[]): string {
   return `class="${args.join(" ")}"`;
+}
+
+export function createFolder(folderName: string): void {
+  mkdir(folderName, {recursive: true}, (error) => {
+    if (error !== null) {
+      console.error("Error creating folder: ", error);
+    }
+  });
 }

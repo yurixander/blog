@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import fs from "fs";
 import path from "path";
 import {simpleGit, type SimpleGit} from "simple-git";
-import {EnvironmentVariable, requireEnvVariable} from "./util.js";
+import {EnvironmentVariable, createFolder, requireEnvVariable} from "./util.js";
 
 let gitSingleton: SimpleGit | null = null;
 
@@ -107,5 +107,16 @@ export async function writeWorkspaceFile(
   const basePath = requireEnvVariable(EnvironmentVariable.WorkspacePath);
   const fullPath = path.join(basePath, subPath);
 
+  await fs.promises.writeFile(fullPath, contents, {encoding: "utf8"});
+}
+
+export async function writePost(
+  postName: string,
+  contents: string
+): Promise<void> {
+  const basePath = requireEnvVariable(EnvironmentVariable.WorkspacePostFolder);
+  const fullPath = path.join(basePath, postName);
+
+  createFolder(basePath);
   await fs.promises.writeFile(fullPath, contents, {encoding: "utf8"});
 }

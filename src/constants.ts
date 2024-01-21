@@ -1,5 +1,9 @@
 export const tailwindConfig = {
-  content: ["./templates/*.html", "./.workspace/*.html"],
+  content: [
+    "./templates/*.html",
+    "./.workspace/*.html",
+    "./.workspace/posts/*.html",
+  ],
   theme: {
     extend: {
       backgroundImage: {
