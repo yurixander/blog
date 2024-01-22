@@ -92,21 +92,41 @@ export async function renderPage(
     }
 
     if (block.has_children) {
+      const elementListChildren: Html[] = [];
+      let inListChildren = false;
+
       const children = await fetchBlockChildren(block.id);
       let childrenHtmlContents: Html = "";
 
       for (const child of children) {
+        if (elementListChildren.length > 0 && !inListChildren) {
+          inListChildren = true;
+        }
+
+        if (
+          child.type !== "numbered_list_item" &&
+          child.type !== "bulleted_list_item" &&
+          elementListChildren.length > 0
+        ) {
+          inListChildren = false;
+          const isNumbered = elementListChildren.includes("<ol>");
+          elementListChildren.push(isNumbered ? "</ol>" : "</ul>");
+
+          childrenHtmlContents += elementListChildren.join("");
+          elementListChildren.length = 0;
+        }
+
         childrenHtmlContents += transformBlockToHtml(
           child,
-          inList,
-          elementList
+          inListChildren,
+          elementListChildren
         );
       }
 
       pageHtmlContents += transformBlockToHtml(
         block,
-        inList,
-        elementList,
+        inListChildren,
+        elementListChildren,
         childrenHtmlContents
       );
     } else {
