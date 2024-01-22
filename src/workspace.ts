@@ -71,6 +71,7 @@ export function tryCleanFilesWorkspace(): boolean {
     if (file === ".git") {
       continue;
     }
+
     fs.unlinkSync(path.join(workspacePath, file));
   }
 

@@ -70,7 +70,6 @@ export function extractColor(color: string): string {
 
   if (isBackgroundColor) {
     const bgColor = color.replace("_background", "");
-
     const bgDark = `dark:bg-${bgColor}`;
     const bgLight = `bg-${bgColor}`;
 
@@ -195,8 +194,10 @@ export const heading2Transformer = (
     if (heading2.has_children && children !== undefined) {
       return createToggleableElement(contents, children, HeadingType.H2);
     }
+
     return createToggleableElement(contents, "", HeadingType.H2);
   }
+
   return createHtmlElement({tag: "h2", contents});
 };
 
@@ -215,8 +216,10 @@ const heading3Transformer = (
     if (heading3.has_children && children !== undefined) {
       return createToggleableElement(contents, children, HeadingType.H3);
     }
+
     return createToggleableElement(contents, "", HeadingType.H3);
   }
+
   return createHtmlElement({tag: "h3", contents});
 };
 
@@ -229,6 +232,7 @@ function bulletedListItemTransformer(
     transformRichTextToHtml,
     bulletedListItem.bulleted_list_item.rich_text
   );
+
   const item = createHtmlElement({tag: "li", contents});
 
   if (list !== undefined) {
@@ -328,6 +332,7 @@ const imageTransformer: Transformer<ImageBlockObjectResponse> = (image) => {
     });
 
     const caption = createHtmlElement({tag: "p", contents});
+
     const container = createHtmlElement({
       tag: "div",
       contents: `${imageHtml}${caption}`,
@@ -342,6 +347,7 @@ const imageTransformer: Transformer<ImageBlockObjectResponse> = (image) => {
     });
 
     const caption = createHtmlElement({tag: "p", contents});
+
     const container = createHtmlElement({
       tag: "div",
       contents: `${imageHtml}${caption}`,

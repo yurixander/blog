@@ -100,11 +100,31 @@ async function deploy(pages: PageObjectResponse[]): Promise<void> {
     "Workspace should be successfully initialized after cleaning."
   );
 
+  const renderQueue = [];
+
   for (const page of pages) {
     const renderedPage = await renderPage(page);
+    const report = await validateHtml(renderedPage.html);
 
-    void validateHtml(renderedPage.html);
+    if (report.valid) {
+      renderQueue.push(renderedPage);
 
+      continue;
+    }
+
+    // TODO: Need to properly access the `title` property.
+    logger.error(
+      `Invalid HTML for ${page.properties.Name.title[0].text.content}.`
+    );
+
+    for (const result of report.results) {
+      for (const message of result.messages) {
+        logger.info(`@ ${message.line}: ${message.column}: ${message.message}`);
+      }
+    }
+  }
+
+  for (const renderedPage of renderQueue) {
     const filename = `${convertTitleToFilename(renderedPage.title)}.html`;
 
     await writePost(filename, renderedPage.html);
@@ -113,7 +133,7 @@ async function deploy(pages: PageObjectResponse[]): Promise<void> {
 
   void generateSitemap();
 
-  // Process css
+  // Process CSS.
   void runPostcss();
 
   await stageCommitAndPush();

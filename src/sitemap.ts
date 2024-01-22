@@ -67,10 +67,8 @@ function extractPostsProps(): PostProp[] {
 
 export async function generateSitemap(): Promise<void> {
   const logger = getOrSetLogger();
-
   const title = requireEnvVariable(EnvironmentVariable.SiteTitle);
   const siteFilename = "index.html";
-
   const postProps = extractPostsProps();
   let contentHtml: Html = "";
 
@@ -80,6 +78,7 @@ export async function generateSitemap(): Promise<void> {
       contents: postProp.name,
       args: `href="${postProp.route}"`,
     });
+
     contentHtml += createHtmlElement({tag: "li", contents: linkContent});
   }
 

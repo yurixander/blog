@@ -65,7 +65,6 @@ export async function renderPage(
 ): Promise<RenderedPage> {
   const blocks = await fetchPageContents(page.id);
   let pageHtmlContents: Html = "";
-
   const elementList: Html[] = [];
   let inList = false;
 
@@ -84,54 +83,57 @@ export async function renderPage(
       elementList.length > 0
     ) {
       inList = false;
-      const isNumbered = elementList.includes("<ol>");
-      elementList.push(isNumbered ? "</ol>" : "</ul>");
 
+      const isNumbered = elementList.includes("<ol>");
+
+      elementList.push(isNumbered ? "</ol>" : "</ul>");
       pageHtmlContents += elementList.join("");
       elementList.length = 0;
     }
 
-    if (block.has_children) {
-      const elementListChildren: Html[] = [];
-      let inListChildren = false;
+    if (!block.has_children) {
+      pageHtmlContents += transformBlockToHtml(block, inList, elementList);
 
-      const children = await fetchBlockChildren(block.id);
-      let childrenHtmlContents: Html = "";
+      continue;
+    }
 
-      for (const child of children) {
-        if (elementListChildren.length > 0 && !inListChildren) {
-          inListChildren = true;
-        }
+    const elementListChildren: Html[] = [];
+    let inListChildren = false;
+    const children = await fetchBlockChildren(block.id);
+    let childrenHtmlContents: Html = "";
 
-        if (
-          child.type !== "numbered_list_item" &&
-          child.type !== "bulleted_list_item" &&
-          elementListChildren.length > 0
-        ) {
-          inListChildren = false;
-          const isNumbered = elementListChildren.includes("<ol>");
-          elementListChildren.push(isNumbered ? "</ol>" : "</ul>");
-
-          childrenHtmlContents += elementListChildren.join("");
-          elementListChildren.length = 0;
-        }
-
-        childrenHtmlContents += transformBlockToHtml(
-          child,
-          inListChildren,
-          elementListChildren
-        );
+    for (const child of children) {
+      if (elementListChildren.length > 0 && !inListChildren) {
+        inListChildren = true;
       }
 
-      pageHtmlContents += transformBlockToHtml(
-        block,
+      if (
+        child.type !== "numbered_list_item" &&
+        child.type !== "bulleted_list_item" &&
+        elementListChildren.length > 0
+      ) {
+        inListChildren = false;
+
+        const isNumbered = elementListChildren.includes("<ol>");
+
+        elementListChildren.push(isNumbered ? "</ol>" : "</ul>");
+        childrenHtmlContents += elementListChildren.join("");
+        elementListChildren.length = 0;
+      }
+
+      childrenHtmlContents += transformBlockToHtml(
+        child,
         inListChildren,
-        elementListChildren,
-        childrenHtmlContents
+        elementListChildren
       );
-    } else {
-      pageHtmlContents += transformBlockToHtml(block, inList, elementList);
     }
+
+    pageHtmlContents += transformBlockToHtml(
+      block,
+      inListChildren,
+      elementListChildren,
+      childrenHtmlContents
+    );
   }
 
   const css = loadStylesheet();

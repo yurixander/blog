@@ -6,7 +6,7 @@ import {
   type PartialDatabaseObjectResponse,
   type PartialPageObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints.js";
-import {HtmlValidate} from "html-validate";
+import {HtmlValidate, type Report} from "html-validate";
 import moment from "moment-timezone";
 import winston, {type Logger} from "winston";
 import {mkdir} from "fs";
@@ -60,21 +60,10 @@ export function getOrSetLogger(): Logger {
   return loggerSingleton;
 }
 
-export async function validateHtml(html: Html): Promise<void> {
+export async function validateHtml(html: Html): Promise<Report> {
   const htmlValidate = new HtmlValidate();
-  const report = await htmlValidate.validateString(html);
-  const logger = getOrSetLogger();
 
-  if (!report.valid) {
-    logger.info("Errors: ", report.errorCount);
-    for (const result of report.results) {
-      for (const message of result.messages) {
-        logger.info(
-          `Line ${message.line}, Column ${message.column}: ${message.message}`
-        );
-      }
-    }
-  }
+  return await htmlValidate.validateString(html);
 }
 
 export function requireEnvVariable(name: EnvironmentVariable): string {

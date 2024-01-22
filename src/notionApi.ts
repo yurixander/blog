@@ -86,7 +86,9 @@ export async function fetchBlockChildren(
   const children = await getOrSetNotionClient().blocks.children.list({
     block_id: blockId,
   });
+
   const blocks: BlockObjectResponse[] = [];
+
   for (const result of children.results) {
     if (isBlockObjectResponse(result)) {
       blocks.push(result);
