@@ -26,6 +26,7 @@ export enum EnvironmentVariable {
   PostCssInputPath = "POSTCSS_INPUT",
   PostCssOutputPath = "POSTCSS_OUTPUT",
   WorkspacePostFolder = "WORKSPACE_POST_FOLDER",
+  FetchPageSize = "FETCH_PAGE_SIZE",
 }
 
 export type Html = string;

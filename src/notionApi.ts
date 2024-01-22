@@ -29,9 +29,11 @@ export function getOrSetNotionClient(): Client {
 export async function fetchPageContents(
   pageId: string
 ): Promise<Array<PartialBlockObjectResponse | BlockObjectResponse>> {
+  const pageSize = requireEnvVariable(EnvironmentVariable.FetchPageSize);
+
   const response = await getOrSetNotionClient().blocks.children.list({
     block_id: pageId,
-    page_size: 50,
+    page_size: parseInt(pageSize),
   });
 
   return response.results;
