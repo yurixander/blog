@@ -49,6 +49,9 @@ export const tailwindConfig = {
       red: "#DF5452",
       blueCheckbox: "#1865e0",
     },
+    fontFamily: {
+      sans: ["sans-serif"],
+    },
   },
   plugins: [],
 };

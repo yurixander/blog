@@ -44,7 +44,7 @@ a {
 
 html,
 body {
-  @apply font-sans text-dark bg-defaultBg dark:text-white dark:bg-defaultBgDark;
+  @apply space-y-4 font-sans text-dark bg-defaultBg dark:text-white dark:bg-defaultBgDark;
 }
 
 body {
@@ -102,4 +102,8 @@ details[open] > summary:before {
 
 img {
   @apply max-w-xl object-cover;
+}
+
+code {
+  @apply bg-calloutBgColor p-1 w-max rounded text-red dark:bg-calloutBgColorDark;
 }

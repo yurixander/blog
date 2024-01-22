@@ -15,7 +15,7 @@ import {
   type ToDoBlockObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints.js";
 import {createHtmlElement} from "./template.js";
-import {tailwindClassMerge, todo, type Html} from "./util.js";
+import {processPlainText, tailwindClassMerge, todo, type Html} from "./util.js";
 import {backgroundColors, colors} from "./constants.js";
 
 type Transformer<T extends BlockObjectResponse = never> = (block: T) => Html;
@@ -29,7 +29,7 @@ enum HeadingType {
 export function transformBlockToHtml(
   block: BlockObjectResponse,
   inList: boolean,
-  numberedList?: Html[],
+  list?: Html[],
   children?: Html
 ): Html {
   switch (block.type) {
@@ -42,11 +42,11 @@ export function transformBlockToHtml(
     case "heading_3":
       return heading3Transformer(block, children);
     case "bulleted_list_item":
-      return bulletedListItemTransformer(block);
+      return bulletedListItemTransformer(block, inList, list);
     case "quote":
       return quoteTransformer(block);
     case "numbered_list_item":
-      return numberedListItemTransformer(block, inList, numberedList);
+      return numberedListItemTransformer(block, inList, list);
     case "divider":
       return dividerTransformer(block);
     case "to_do":
@@ -112,6 +112,7 @@ function createToggleableElement(
 export function transformRichTextToHtml(richText: RichTextItemResponse): Html {
   const listTag: string[] = [];
   let args: string | undefined;
+  let isCode = false;
 
   if (richText.type === "text") {
     if (richText.annotations.bold) {
@@ -125,8 +126,12 @@ export function transformRichTextToHtml(richText: RichTextItemResponse): Html {
     } else if (richText.annotations.color !== "default") {
       args = extractColor(richText.annotations.color);
     }
+    if (richText.annotations.code) {
+      isCode = true;
+    }
 
-    const text = createHtmlElementList(listTag, richText.text.content);
+    const textProcessed = processPlainText(richText.plain_text);
+    const text = createHtmlElementList(listTag, textProcessed);
 
     if (richText.text.link?.url !== undefined) {
       return createHtmlElement({
@@ -136,7 +141,7 @@ export function transformRichTextToHtml(richText: RichTextItemResponse): Html {
       });
     }
     return createHtmlElement({
-      tag: "span",
+      tag: isCode ? "code" : "span",
       contents: text,
       args,
     });
@@ -215,16 +220,28 @@ const heading3Transformer = (
   return createHtmlElement({tag: "h3", contents});
 };
 
-const bulletedListItemTransformer: Transformer<
-  BulletedListItemBlockObjectResponse
-> = (bulletedListItem) => {
+function bulletedListItemTransformer(
+  bulletedListItem: BulletedListItemBlockObjectResponse,
+  inList: boolean,
+  list?: Html[]
+): Html {
   const contents = transformToHtmlString(
     transformRichTextToHtml,
     bulletedListItem.bulleted_list_item.rich_text
   );
+  const item = createHtmlElement({tag: "li", contents});
 
-  return createHtmlElement({tag: "li", contents});
-};
+  if (list !== undefined) {
+    if (inList) {
+      list.push(item);
+    } else {
+      list.push("<ul>");
+      list.push(item);
+    }
+  }
+
+  return "";
+}
 
 const quoteTransformer: Transformer<QuoteBlockObjectResponse> = (quote) => {
   const contents = transformToHtmlString(
@@ -253,7 +270,8 @@ function numberedListItemTransformer(
     if (inList) {
       numberedList.push(item);
     } else {
-      numberedList.push(`<ol>${item}`);
+      numberedList.push("<ol>");
+      numberedList.push(item);
     }
   }
 

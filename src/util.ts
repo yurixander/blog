@@ -138,6 +138,12 @@ export function tailwindClassMerge(...args: string[]): string {
   return `class="${args.join(" ")}"`;
 }
 
+export function processPlainText(plainText: string): string {
+  // TODO: Check why not replace an other < > of the paragraph.
+
+  return plainText.replace("<", "&lt;").replace(">", "&gt;");
+}
+
 export function createFolder(folderName: string): void {
   mkdir(folderName, {recursive: true}, (error) => {
     if (error !== null) {

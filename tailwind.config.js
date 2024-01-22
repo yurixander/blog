@@ -25,6 +25,7 @@ export default {
         blue: "#7ea3de51",
         purpleDark: "#77509e",
         purple: "#b887ea51",
+        calloutBgColor: "#e4e4e4a5",
         calloutBgColorDark: "#393939",
       },
       colors: {

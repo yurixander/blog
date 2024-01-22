@@ -66,7 +66,7 @@ export async function renderPage(
   const blocks = await fetchPageContents(page.id);
   let pageHtmlContents: Html = "";
 
-  const numberedList: Html[] = [];
+  const elementList: Html[] = [];
   let inList = false;
 
   for (const block of blocks) {
@@ -74,16 +74,21 @@ export async function renderPage(
       continue;
     }
 
-    if (numberedList.length > 0 && !inList) {
+    if (elementList.length > 0 && !inList) {
       inList = true;
     }
 
-    if (block.type !== "numbered_list_item" && numberedList.length > 0) {
+    if (
+      block.type !== "numbered_list_item" &&
+      block.type !== "bulleted_list_item" &&
+      elementList.length > 0
+    ) {
       inList = false;
-      numberedList.push("</ol>");
+      const isNumbered = elementList.includes("<ol>");
+      elementList.push(isNumbered ? "</ol>" : "</ul>");
 
-      pageHtmlContents += numberedList.join("");
-      numberedList.length = 0;
+      pageHtmlContents += elementList.join("");
+      elementList.length = 0;
     }
 
     if (block.has_children) {
@@ -94,18 +99,18 @@ export async function renderPage(
         childrenHtmlContents += transformBlockToHtml(
           child,
           inList,
-          numberedList
+          elementList
         );
       }
 
       pageHtmlContents += transformBlockToHtml(
         block,
         inList,
-        numberedList,
+        elementList,
         childrenHtmlContents
       );
     } else {
-      pageHtmlContents += transformBlockToHtml(block, inList, numberedList);
+      pageHtmlContents += transformBlockToHtml(block, inList, elementList);
     }
   }
 
