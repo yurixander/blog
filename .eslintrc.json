@@ -5,7 +5,7 @@
   },
   "extends": [
     "standard-with-typescript",
-    "prettier",
+    "eslint-config-prettier",
     "plugin:tailwindcss/recommended"
   ],
   "parserOptions": {

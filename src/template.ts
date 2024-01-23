@@ -36,6 +36,10 @@ export type CreateHtmlElementProps = {
 type HtmlTag = keyof HTMLElementTagNameMap;
 
 export function createHtmlElement(props: CreateHtmlElementProps): Html {
+  if (props.contents !== undefined && props.contents.trim() === "") {
+    return "";
+  }
+
   if (props.isSingle ?? false) {
     return `<${props.tag}${props.args !== undefined ? ` ${props.args}` : ""}>`;
   }

@@ -50,7 +50,8 @@ export const tailwindConfig = {
       blueCheckbox: "#1865e0",
     },
     fontFamily: {
-      sans: ["sans-serif"],
+      raleway: ["Raleway", "sans-serif"],
+      merrinweather: ["Merriweather", "serif"],
     },
   },
   plugins: [],

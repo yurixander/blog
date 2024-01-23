@@ -112,10 +112,7 @@ async function deploy(pages: PageObjectResponse[]): Promise<void> {
       continue;
     }
 
-    // TODO: Need to properly access the `title` property.
-    logger.error(
-      `Invalid HTML for ${page.properties.Name.title[0].text.content}.`
-    );
+    logger.error(`Invalid HTML for ${extractTitle(page)}.`);
 
     for (const result of report.results) {
       for (const message of result.messages) {

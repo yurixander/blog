@@ -42,6 +42,9 @@ export default {
         red: "#DF5452",
         blueCheckbox: "#1865e0",
       },
+      fontFamily: {
+        lobster: ["Lobster", "cursive"],
+      },
     },
     plugins: [],
   },

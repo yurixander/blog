@@ -20,7 +20,11 @@
   --max-img-width-small: 18.75rem;
 }
 
-/* TODO: Optimize for CSS properties that are used in HTML. */
+h1,
+h2,
+h3 {
+  @apply font-raleway font-bold;
+}
 
 h1 {
   @apply text-3xl w-max;
@@ -35,7 +39,7 @@ h3 {
 }
 
 a {
-  @apply underline;
+  @apply hover:underline;
 }
 
 * {
@@ -44,11 +48,11 @@ a {
 
 html,
 body {
-  @apply space-y-4 font-sans text-dark bg-defaultBg dark:text-white dark:bg-defaultBgDark;
+  @apply space-y-4 font-merrinweather text-dark bg-defaultBg dark:text-white dark:bg-defaultBgDark;
 }
 
 body {
-  @apply flex p-24 flex-col gap-1;
+  @apply flex p-28 flex-col gap-1;
 }
 
 li {

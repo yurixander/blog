@@ -136,7 +136,7 @@ export function transformRichTextToHtml(richText: RichTextItemResponse): Html {
       return createHtmlElement({
         tag: "a",
         contents: text,
-        args: `href="${richText.text.link?.url}"`,
+        args: `href="${richText.text.link?.url}" ${args}`,
       });
     }
     return createHtmlElement({
@@ -159,6 +159,10 @@ const paragraphTransformer: Transformer<ParagraphBlockObjectResponse> = (
     transformRichTextToHtml,
     paragraph.paragraph.rich_text
   );
+
+  if (contents.length === 0) {
+    return "";
+  }
 
   return createHtmlElement({tag: "p", contents});
 };
