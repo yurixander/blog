@@ -52,7 +52,11 @@ body {
 }
 
 body {
-  @apply flex p-28 flex-col gap-1;
+  @apply flex p-28 flex-col gap-2;
+}
+
+ul {
+  @apply list-disc list-inside;
 }
 
 li {
@@ -85,6 +89,10 @@ input[type="checkbox"]:checked {
 
 .callout-container > .icon {
   @apply size-5;
+}
+
+.details-container {
+  @apply p-4;
 }
 
 details > summary {

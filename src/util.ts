@@ -141,3 +141,15 @@ export function createFolder(folderName: string): void {
     }
   });
 }
+
+export function convertYTUrlToEmbed(url: string): string {
+  const regExp =
+    /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/(watch\?v=|embed\/|v\/)?([a-zA-Z0-9\-_]{11})/;
+  const match = url.match(regExp);
+
+  if (match != null && match[5].length > 0) {
+    return `https://www.youtube.com/embed/${match[5]}`;
+  }
+
+  return "";
+}

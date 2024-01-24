@@ -13,9 +13,16 @@ import {
   type QuoteBlockObjectResponse,
   type RichTextItemResponse,
   type ToDoBlockObjectResponse,
+  type VideoBlockObjectResponse,
 } from "@notionhq/client/build/src/api-endpoints.js";
 import {createHtmlElement} from "./template.js";
-import {processPlainText, tailwindClassMerge, todo, type Html} from "./util.js";
+import {
+  convertYTUrlToEmbed,
+  processPlainText,
+  tailwindClassMerge,
+  todo,
+  type Html,
+} from "./util.js";
 import {backgroundColors, colors} from "./constants.js";
 
 type Transformer<T extends BlockObjectResponse = never> = (block: T) => Html;
@@ -55,9 +62,55 @@ export function transformBlockToHtml(
       return imageTransformer(block);
     case "callout":
       return calloutTransformer(block);
+    case "video":
+      return videoTransformer(block);
     default:
       throw new Error(`Unknown block type: ${block.type}`);
   }
+}
+
+export function videoTransformer(video: VideoBlockObjectResponse): Html {
+  const contents = transformToHtmlString(
+    transformRichTextToHtml,
+    video.video.caption
+  );
+
+  const caption = createHtmlElement({tag: "p", contents});
+
+  if (video.video.type === "external") {
+    const src = convertYTUrlToEmbed(video.video.external.url);
+
+    const videoEmbed = createHtmlElement({
+      tag: "iframe",
+      args: `width="560" height="315" src="${src}" allowfullscreen title="Video embed"`,
+    });
+
+    const container = createHtmlElement({
+      tag: "div",
+      contents: `${videoEmbed}${caption}`,
+    });
+
+    return container;
+  }
+
+  const source = createHtmlElement({
+    tag: "source",
+    args: `src="${video.video.file.url}"`,
+    isSingle: true,
+  });
+
+  const videoEmbed = createHtmlElement({
+    tag: "video",
+    contents: source,
+    args: `controls width="320"`,
+  });
+
+  const container = createHtmlElement({
+    tag: "div",
+    contents: `${videoEmbed}${caption}`,
+  });
+
+  return container;
 }
 
 export function extractColor(color: string): string {
@@ -102,10 +155,17 @@ function createToggleableElement(
   content: Html,
   headingType: HeadingType
 ): Html {
-  return `<details>
-  <summary><${headingType}>${title}</${headingType}></summary>
-  ${content}
-</details>`;
+  const summaryTitle = createHtmlElement({tag: headingType, contents: title});
+  const summary = createHtmlElement({tag: "summary", contents: summaryTitle});
+  const detailsContent = createHtmlElement({
+    tag: "div",
+    args: `class="details-container"`,
+    contents: content,
+  });
+  return createHtmlElement({
+    tag: "details",
+    contents: `${summary}${detailsContent}`,
+  });
 }
 
 export function transformRichTextToHtml(richText: RichTextItemResponse): Html {
@@ -116,13 +176,17 @@ export function transformRichTextToHtml(richText: RichTextItemResponse): Html {
   if (richText.type === "text") {
     if (richText.annotations.bold) {
       listTag.unshift("b");
-    } else if (richText.annotations.italic) {
+    }
+    if (richText.annotations.italic) {
       listTag.unshift("i");
-    } else if (richText.annotations.underline) {
+    }
+    if (richText.annotations.underline) {
       listTag.unshift("u");
-    } else if (richText.annotations.strikethrough) {
+    }
+    if (richText.annotations.strikethrough) {
       listTag.unshift("del");
-    } else if (richText.annotations.color !== "default") {
+    }
+    if (richText.annotations.color !== "default") {
       args = extractColor(richText.annotations.color);
     }
     if (richText.annotations.code) {

@@ -3,4 +3,4 @@
 
 # TODO: Check some plugin tailwindcss with stylelint and postcss
 #npx stylelint "**/*.css"
-#npx eslint "src/**/*.ts"
+npx eslint "src/**/*.ts"

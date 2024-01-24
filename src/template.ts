@@ -106,16 +106,30 @@ export async function renderPage(
     const children = await fetchBlockChildren(block.id);
     let childrenHtmlContents: Html = "";
 
+    let index = 0;
+
     for (const child of children) {
       if (elementListChildren.length > 0 && !inListChildren) {
         inListChildren = true;
       }
 
+      const isListItem =
+        child.type === "numbered_list_item" ||
+        child.type === "bulleted_list_item";
+      const isLastChild = index === children.length - 1;
+
       if (
-        child.type !== "numbered_list_item" &&
-        child.type !== "bulleted_list_item" &&
-        elementListChildren.length > 0
+        (child.type !== "numbered_list_item" &&
+          child.type !== "bulleted_list_item" &&
+          elementListChildren.length > 0) ||
+        (isLastChild && isListItem && elementListChildren.length > 0)
       ) {
+        if (isLastChild) {
+          elementListChildren.push(
+            transformBlockToHtml(child, inListChildren, elementListChildren)
+          );
+        }
+
         inListChildren = false;
 
         const isNumbered = elementListChildren.includes("<ol>");
@@ -130,6 +144,8 @@ export async function renderPage(
         inListChildren,
         elementListChildren
       );
+
+      index++;
     }
 
     pageHtmlContents += transformBlockToHtml(
