@@ -1,7 +1,11 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   darkMode: "media",
-  content: ["./templates/*.html", "./.workspace/*.html"],
+  content: [
+    "./templates/*.html",
+    "./.workspace/*.html",
+    "./.workspace/posts/*.html",
+  ],
   theme: {
     extend: {
       backgroundImage: {
@@ -43,7 +47,8 @@ export default {
         blueCheckbox: "#1865e0",
       },
       fontFamily: {
-        lobster: ["Lobster", "cursive"],
+        raleway: ["Raleway", "sans-serif"],
+        merrinweather: ["Merriweather", "serif"],
       },
     },
     plugins: [],

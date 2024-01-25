@@ -2,7 +2,7 @@ import {type PageObjectResponse} from "@notionhq/client/build/src/api-endpoints.
 import fs from "fs";
 import handlebars from "handlebars";
 import {fetchBlockChildren, fetchPageContents} from "./notionApi.js";
-import {extractTitle, transformBlockToHtml} from "./transform.js";
+import {extractCover, extractTitle, transformBlockToHtml} from "./transform.js";
 import {isBlockObjectResponse, type Html} from "./util.js";
 
 export type LayoutTemplateReplacements = {
@@ -13,7 +13,7 @@ export type LayoutTemplateReplacements = {
 
 export type PostTemplateReplacements = {
   content: Html;
-  postTitle: string;
+  postTitle: Html;
 };
 
 export enum HtmlTemplate {
@@ -158,10 +158,11 @@ export async function renderPage(
 
   const css = loadStylesheet();
   const title = extractTitle(page);
+  const coverWithTitle = extractCover(page);
 
   const pageHtml = renderTemplate<PostTemplateReplacements>(HtmlTemplate.Page, {
     content: pageHtmlContents,
-    postTitle: title,
+    postTitle: coverWithTitle,
   });
 
   const html = renderTemplate<LayoutTemplateReplacements>(HtmlTemplate.Layout, {

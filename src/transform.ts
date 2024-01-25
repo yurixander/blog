@@ -475,3 +475,49 @@ export function extractTitle(page: PageObjectResponse): string {
 
   return title;
 }
+
+export function extractCover(page: PageObjectResponse): Html {
+  if (page.cover?.type === "external") {
+    const title = createHtmlElement({
+      tag: "div",
+      args: `class="page-title"`,
+      contents: extractTitle(page),
+    });
+
+    const image = createHtmlElement({
+      tag: "img",
+      isSingle: true,
+      args: `src="${page.cover.external.url}" alt="Post cover"`,
+    });
+
+    const cover = createHtmlElement({
+      tag: "div",
+      contents: `${image}${title}`,
+      args: `class="cover"`,
+    });
+
+    return cover;
+  } else if (page.cover?.type === "file") {
+    const title = createHtmlElement({
+      tag: "div",
+      args: `class="page-title"`,
+      contents: extractTitle(page),
+    });
+
+    const image = createHtmlElement({
+      tag: "img",
+      isSingle: true,
+      args: `src="${page.cover.file.url}"`,
+    });
+
+    const cover = createHtmlElement({
+      tag: "div",
+      contents: `${image}${title}`,
+      args: `class="cover"`,
+    });
+
+    return cover;
+  }
+
+  return "";
+}
