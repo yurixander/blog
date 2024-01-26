@@ -46,23 +46,15 @@ function extractPostsProps(): PostProp[] {
     EnvironmentVariable.WorkspacePostFolder
   );
 
-  const postProps: PostProp[] = [];
   const files = fs.readdirSync(workspacePostsPath);
   const postsPath = workspacePostsPath.replace(workspacePath + "/", "");
 
-  for (const file of files) {
-    const relativePath = path.join(workspacePostsPath, file);
-    const relativeFilePath = path.join(postsPath, file);
-
-    if (fs.statSync(relativePath).isFile()) {
-      postProps.push({
-        name: file.replace(".html", ""),
-        route: relativeFilePath,
-      });
-    }
-  }
-
-  return postProps;
+  return files
+    .filter((file) => fs.statSync(path.join(workspacePostsPath, file)).isFile())
+    .map((file) => ({
+      name: path.basename(file, ".html"),
+      route: path.join(postsPath, file),
+    }));
 }
 
 export async function generateSitemap(): Promise<void> {
@@ -70,17 +62,19 @@ export async function generateSitemap(): Promise<void> {
   const title = requireEnvVariable(EnvironmentVariable.SiteTitle);
   const siteFilename = "index.html";
   const postProps = extractPostsProps();
-  let contentHtml: Html = "";
 
-  for (const postProp of postProps) {
-    const linkContent = createHtmlElement({
-      tag: "a",
-      contents: postProp.name,
-      args: `href="${postProp.route}"`,
-    });
-
-    contentHtml += createHtmlElement({tag: "li", contents: linkContent});
-  }
+  const contentHtml = postProps
+    .map((postProp) =>
+      createHtmlElement({
+        tag: "li",
+        contents: createHtmlElement({
+          tag: "a",
+          contents: postProp.name,
+          args: `href="${postProp.route}"`,
+        }),
+      })
+    )
+    .join("");
 
   const html = renderTemplate<IndexTemplateReplacements>(HtmlTemplate.Index, {
     siteTitle: title,

@@ -118,6 +118,6 @@ export async function writePost(
   const basePath = requireEnvVariable(EnvironmentVariable.WorkspacePostFolder);
   const fullPath = path.join(basePath, postName);
 
-  createFolder(basePath);
+  await createFolder(basePath);
   await fs.promises.writeFile(fullPath, contents, {encoding: "utf8"});
 }

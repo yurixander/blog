@@ -2,23 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --gap-blocks: 1rem;
-  --font-size-title: 2.25rem;
-  --font-size-base: 1rem;
-  --font-size-h1: 2rem;
-  --font-size-h2: 1.5rem;
-  --font-size-h3: 1.25rem;
-  --font-size-small: 0.75rem;
-  --font-size-medium: 0.875rem;
-  --padding-default: 16px;
-  --padding-medium: 12px;
-  --padding-small: 8px;
-  --border-radius: 4px;
-  --max-img-width-large: 39.5rem;
-  --max-img-width-medium: 31.25rem;
-  --max-img-width-small: 18.75rem;
-}
 p {
   @apply leading-relaxed;
 }

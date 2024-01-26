@@ -26,7 +26,7 @@ export async function runPostcss(): Promise<void> {
     .then((result) => {
       fs.mkdir(folder, {recursive: true}, (error) => {
         if (error != null) {
-          console.error("Error :", error);
+          throw error;
         } else {
           fs.writeFileSync(".workspace/styles/styles.css", result.css);
         }

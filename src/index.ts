@@ -1,7 +1,7 @@
 import {type PageObjectResponse} from "@notionhq/client/build/src/api-endpoints.js";
 import {config} from "dotenv";
 import fs from "fs";
-import {fetchLastEditedTime, fetchSharedPages} from "./notionApi.js";
+import {fetchSharedPages} from "./notionApi.js";
 import {renderPage} from "./template.js";
 import {
   EnvironmentVariable,
@@ -70,7 +70,7 @@ async function checkForChanges(): Promise<boolean> {
   const pages = await fetchSharedPages();
 
   for (const page of pages) {
-    const notionLastEditedTime = await fetchLastEditedTime(page.id);
+    const notionLastEditedTime = page.last_edited_time;
 
     const wasModified =
       !(page.id in localLastEditedTimes) ||

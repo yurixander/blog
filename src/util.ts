@@ -10,6 +10,7 @@ import {HtmlValidate, type Report} from "html-validate";
 import moment from "moment-timezone";
 import winston, {type Logger} from "winston";
 import {mkdir} from "fs";
+import {YT_REG_EXP} from "./constants.js";
 
 export enum EnvironmentVariable {
   SiteTitle = "SITE_TITLE",
@@ -129,27 +130,29 @@ export function tailwindClassMerge(...args: string[]): string {
 }
 
 export function processPlainText(plainText: string): string {
-  // TODO: Check why not replace an other < > of the paragraph.
-
   return plainText.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-export function createFolder(folderName: string): void {
+export async function createFolder(folderName: string): Promise<void> {
   mkdir(folderName, {recursive: true}, (error) => {
     if (error !== null) {
-      console.error("Error creating folder: ", error);
+      throw new Error(`Error creating folder: ${error.message}`);
     }
   });
 }
 
 export function convertYTUrlToEmbed(url: string): string {
-  const regExp =
-    /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/(watch\?v=|embed\/|v\/)?([a-zA-Z0-9\-_]{11})/;
-  const match = url.match(regExp);
+  const match = url.match(YT_REG_EXP);
 
   if (match != null && match[5].length > 0) {
     return `https://www.youtube.com/embed/${match[5]}`;
   }
 
-  return "";
+  throw new Error("Invalid url");
+}
+
+export function checkIsItemList(block: BlockObjectResponse): boolean {
+  return (
+    block.type === "numbered_list_item" || block.type === "bulleted_list_item"
+  );
 }

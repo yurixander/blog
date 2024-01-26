@@ -43,19 +43,6 @@ export type ExtendedPageResponse = GetPageResponse & {
   last_edited_time: string;
 };
 
-export async function fetchPageDetails(
-  pageId: string
-): Promise<ExtendedPageResponse> {
-  // FIXME: This is temporary.
-  return getOrSetNotionClient().pages.retrieve({page_id: pageId}) as any;
-}
-
-export async function fetchLastEditedTime(pageId: string): Promise<string> {
-  const pageDetails = await fetchPageDetails(pageId);
-
-  return pageDetails.last_edited_time;
-}
-
 export async function fetchSharedPages(): Promise<PageObjectResponse[]> {
   const response = await getOrSetNotionClient().search({
     query: "",

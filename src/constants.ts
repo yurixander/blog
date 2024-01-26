@@ -80,3 +80,6 @@ export const backgroundColors = [
   "pink_background",
   "red_background",
 ];
+
+export const YT_REG_EXP =
+  /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/(watch\?v=|embed\/|v\/)?([a-zA-Z0-9\-_]{11})/;

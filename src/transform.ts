@@ -20,7 +20,6 @@ import {
   convertYTUrlToEmbed,
   processPlainText,
   tailwindClassMerge,
-  todo,
   type Html,
 } from "./util.js";
 import {backgroundColors, colors} from "./constants.js";
@@ -173,47 +172,44 @@ export function transformRichTextToHtml(richText: RichTextItemResponse): Html {
   let args: string | undefined;
   let isCode = false;
 
-  if (richText.type === "text") {
-    if (richText.annotations.bold) {
-      listTag.unshift("b");
-    }
-    if (richText.annotations.italic) {
-      listTag.unshift("i");
-    }
-    if (richText.annotations.underline) {
-      listTag.unshift("u");
-    }
-    if (richText.annotations.strikethrough) {
-      listTag.unshift("del");
-    }
-    if (richText.annotations.color !== "default") {
-      args = extractColor(richText.annotations.color);
-    }
-    if (richText.annotations.code) {
-      isCode = true;
-    }
-
-    const textProcessed = processPlainText(richText.plain_text);
-    const text = createHtmlElementList(listTag, textProcessed);
-
-    if (richText.text.link?.url !== undefined) {
-      return createHtmlElement({
-        tag: "a",
-        contents: text,
-        args: `href="${richText.text.link?.url}" ${args}`,
-      });
-    }
-    return createHtmlElement({
-      tag: isCode ? "code" : "span",
-      contents: text,
-      args,
-    });
+  if (richText.type !== "text") {
+    return "";
   }
 
-  // TODO: Handle href.
-  // TODO: Process other types of rich text.
-  console.debug(richText);
-  todo();
+  if (richText.annotations.bold) {
+    listTag.unshift("b");
+  }
+  if (richText.annotations.italic) {
+    listTag.unshift("i");
+  }
+  if (richText.annotations.underline) {
+    listTag.unshift("u");
+  }
+  if (richText.annotations.strikethrough) {
+    listTag.unshift("del");
+  }
+  if (richText.annotations.color !== "default") {
+    args = extractColor(richText.annotations.color);
+  }
+  if (richText.annotations.code) {
+    isCode = true;
+  }
+
+  const textProcessed = processPlainText(richText.plain_text);
+  const text = createHtmlElementList(listTag, textProcessed);
+
+  if (richText.text.link?.url !== undefined) {
+    return createHtmlElement({
+      tag: "a",
+      contents: text,
+      args: `href="${richText.text.link?.url}" ${args}`,
+    });
+  }
+  return createHtmlElement({
+    tag: isCode ? "code" : "span",
+    contents: text,
+    args,
+  });
 }
 
 const paragraphTransformer: Transformer<ParagraphBlockObjectResponse> = (
@@ -259,11 +255,9 @@ export const heading2Transformer = (
   );
 
   if (heading2.heading_2.is_toggleable) {
-    if (heading2.has_children && children !== undefined) {
-      return createToggleableElement(contents, children, HeadingType.H2);
-    }
+    const childrenParam = children ?? "";
 
-    return createToggleableElement(contents, "", HeadingType.H2);
+    return createToggleableElement(contents, childrenParam, HeadingType.H2);
   }
 
   return createHtmlElement({tag: "h2", contents});
@@ -278,14 +272,10 @@ const heading3Transformer = (
     heading3.heading_3.rich_text
   );
 
-  /* TODO: Check why not have a color when have a text style */
-
   if (heading3.heading_3.is_toggleable) {
-    if (heading3.has_children && children !== undefined) {
-      return createToggleableElement(contents, children, HeadingType.H3);
-    }
+    const childrenParam = children ?? "";
 
-    return createToggleableElement(contents, "", HeadingType.H3);
+    return createToggleableElement(contents, childrenParam, HeadingType.H3);
   }
 
   return createHtmlElement({tag: "h3", contents});
@@ -296,6 +286,10 @@ function bulletedListItemTransformer(
   inList: boolean,
   list?: Html[]
 ): Html {
+  if (list === undefined) {
+    return "";
+  }
+
   const contents = transformToHtmlString(
     transformRichTextToHtml,
     bulletedListItem.bulleted_list_item.rich_text
@@ -303,13 +297,11 @@ function bulletedListItemTransformer(
 
   const item = createHtmlElement({tag: "li", contents});
 
-  if (list !== undefined) {
-    if (inList) {
-      list.push(item);
-    } else {
-      list.push("<ul>");
-      list.push(item);
-    }
+  if (inList) {
+    list.push(item);
+  } else {
+    list.push("<ul>");
+    list.push(item);
   }
 
   return "";
@@ -329,7 +321,9 @@ function numberedListItemTransformer(
   inList: boolean,
   numberedList?: Html[]
 ): Html {
-  // TODO: This output should be encapsulated with `<ol>`.
+  if (numberedList === undefined) {
+    return "";
+  }
 
   const contents = transformToHtmlString(
     transformRichTextToHtml,
@@ -338,13 +332,11 @@ function numberedListItemTransformer(
 
   const item = createHtmlElement({tag: "li", contents});
 
-  if (numberedList !== undefined) {
-    if (inList) {
-      numberedList.push(item);
-    } else {
-      numberedList.push("<ol>");
-      numberedList.push(item);
-    }
+  if (inList) {
+    numberedList.push(item);
+  } else {
+    numberedList.push("<ol>");
+    numberedList.push(item);
   }
 
   return "";
@@ -392,39 +384,25 @@ const imageTransformer: Transformer<ImageBlockObjectResponse> = (image) => {
     description += " " + word.plain_text;
   }
 
-  if (image.image.type === "external") {
-    const imageHtml = createHtmlElement({
-      tag: "img",
-      isSingle: true,
-      args: `src="${image.image.external.url}" alt="${description}"`,
-    });
+  const imageUrl =
+    image.image.type === "external"
+      ? image.image.external.url
+      : image.image.file.url;
 
-    const caption = createHtmlElement({tag: "p", contents});
+  const imageHtml = createHtmlElement({
+    tag: "img",
+    isSingle: true,
+    args: `src="${imageUrl}" alt="${description}"`,
+  });
 
-    const container = createHtmlElement({
-      tag: "div",
-      contents: `${imageHtml}${caption}`,
-    });
+  const caption = createHtmlElement({tag: "p", contents});
 
-    return container;
-  } else if (image.image.type === "file") {
-    const imageHtml = createHtmlElement({
-      tag: "img",
-      isSingle: true,
-      args: `src="${image.image.file.url}" alt="${description}"`,
-    });
+  const container = createHtmlElement({
+    tag: "div",
+    contents: `${imageHtml}${caption}`,
+  });
 
-    const caption = createHtmlElement({tag: "p", contents});
-
-    const container = createHtmlElement({
-      tag: "div",
-      contents: `${imageHtml}${caption}`,
-    });
-
-    return container;
-  }
-
-  return createHtmlElement({tag: "img", contents});
+  return container;
 };
 
 const calloutTransformer: Transformer<CalloutBlockObjectResponse> = (
@@ -435,16 +413,25 @@ const calloutTransformer: Transformer<CalloutBlockObjectResponse> = (
     callout.callout.rich_text
   );
 
-  let iconSrc: string;
+  if (callout.callout.icon === null) {
+    return "";
+  }
 
-  if (callout.callout.icon?.type === "external") {
-    iconSrc = callout.callout.icon.external.url;
-  } else if (callout.callout.icon?.type === "emoji") {
-    iconSrc = callout.callout.icon.emoji;
-  } else if (callout.callout.icon?.type === "file") {
-    iconSrc = callout.callout.icon.file.url;
-  } else {
-    throw new Error(`Icon type is undefined`);
+  let iconSrc: string;
+  const iconType = callout.callout.icon.type;
+
+  switch (iconType) {
+    case "external":
+      iconSrc = callout.callout.icon.external.url;
+      break;
+    case "emoji":
+      iconSrc = callout.callout.icon.emoji;
+      break;
+    case "file":
+      iconSrc = callout.callout.icon.file.url;
+      break;
+    default:
+      throw new Error(`Icon type is undefined`);
   }
 
   const icon = createHtmlElement({
@@ -477,47 +464,32 @@ export function extractTitle(page: PageObjectResponse): string {
 }
 
 export function extractCover(page: PageObjectResponse): Html {
-  if (page.cover?.type === "external") {
-    const title = createHtmlElement({
-      tag: "div",
-      args: `class="page-title"`,
-      contents: extractTitle(page),
-    });
-
-    const image = createHtmlElement({
-      tag: "img",
-      isSingle: true,
-      args: `src="${page.cover.external.url}" alt="Post cover"`,
-    });
-
-    const cover = createHtmlElement({
-      tag: "div",
-      contents: `${image}${title}`,
-      args: `class="cover"`,
-    });
-
-    return cover;
-  } else if (page.cover?.type === "file") {
-    const title = createHtmlElement({
-      tag: "div",
-      args: `class="page-title"`,
-      contents: extractTitle(page),
-    });
-
-    const image = createHtmlElement({
-      tag: "img",
-      isSingle: true,
-      args: `src="${page.cover.file.url}"`,
-    });
-
-    const cover = createHtmlElement({
-      tag: "div",
-      contents: `${image}${title}`,
-      args: `class="cover"`,
-    });
-
-    return cover;
+  if (page.cover === null) {
+    return "";
   }
 
-  return "";
+  const urlImage =
+    page.cover.type === "external"
+      ? page.cover.external.url
+      : page.cover.file.url;
+
+  const title = createHtmlElement({
+    tag: "div",
+    args: `class="page-title"`,
+    contents: extractTitle(page),
+  });
+
+  const image = createHtmlElement({
+    tag: "img",
+    isSingle: true,
+    args: `src="${urlImage}" alt="Post cover"`,
+  });
+
+  const cover = createHtmlElement({
+    tag: "div",
+    contents: `${image}${title}`,
+    args: `class="cover"`,
+  });
+
+  return cover;
 }

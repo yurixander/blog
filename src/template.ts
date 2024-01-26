@@ -1,9 +1,13 @@
-import {type PageObjectResponse} from "@notionhq/client/build/src/api-endpoints.js";
+import {
+  type PartialBlockObjectResponse,
+  type BlockObjectResponse,
+  type PageObjectResponse,
+} from "@notionhq/client/build/src/api-endpoints.js";
 import fs from "fs";
 import handlebars from "handlebars";
 import {fetchBlockChildren, fetchPageContents} from "./notionApi.js";
 import {extractCover, extractTitle, transformBlockToHtml} from "./transform.js";
-import {isBlockObjectResponse, type Html} from "./util.js";
+import {checkIsItemList, isBlockObjectResponse, type Html} from "./util.js";
 
 export type LayoutTemplateReplacements = {
   postTitle: string;
@@ -33,20 +37,30 @@ export type CreateHtmlElementProps = {
   isSingle?: boolean;
 };
 
+type CompileNotionListProps = {
+  inListResult: boolean;
+  htmlContentsResult: Html;
+};
+
 type HtmlTag = keyof HTMLElementTagNameMap;
 
-export function createHtmlElement(props: CreateHtmlElementProps): Html {
-  if (props.contents !== undefined && props.contents.trim() === "") {
+export function createHtmlElement({
+  tag,
+  args,
+  contents,
+  isSingle,
+}: CreateHtmlElementProps): Html {
+  if (contents !== undefined && contents.trim() === "") {
     return "";
   }
 
-  if (props.isSingle ?? false) {
-    return `<${props.tag}${props.args !== undefined ? ` ${props.args}` : ""}>`;
+  const argsString = args !== undefined ? ` ${args}` : "";
+
+  if (isSingle ?? false) {
+    return `<${tag}${argsString}>`;
   }
 
-  return `<${props.tag}${props.args !== undefined ? ` ${props.args}` : ""}>${
-    props.contents
-  }</${props.tag}>`;
+  return `<${tag}${argsString}>${contents}</${tag}>`;
 }
 
 export function renderTemplate<
@@ -68,93 +82,7 @@ export async function renderPage(
   page: PageObjectResponse
 ): Promise<RenderedPage> {
   const blocks = await fetchPageContents(page.id);
-  let pageHtmlContents: Html = "";
-  const elementList: Html[] = [];
-  let inList = false;
-
-  for (const block of blocks) {
-    if (!isBlockObjectResponse(block)) {
-      continue;
-    }
-
-    if (elementList.length > 0 && !inList) {
-      inList = true;
-    }
-
-    if (
-      block.type !== "numbered_list_item" &&
-      block.type !== "bulleted_list_item" &&
-      elementList.length > 0
-    ) {
-      inList = false;
-
-      const isNumbered = elementList.includes("<ol>");
-
-      elementList.push(isNumbered ? "</ol>" : "</ul>");
-      pageHtmlContents += elementList.join("");
-      elementList.length = 0;
-    }
-
-    if (!block.has_children) {
-      pageHtmlContents += transformBlockToHtml(block, inList, elementList);
-
-      continue;
-    }
-
-    const elementListChildren: Html[] = [];
-    let inListChildren = false;
-    const children = await fetchBlockChildren(block.id);
-    let childrenHtmlContents: Html = "";
-
-    let index = 0;
-
-    for (const child of children) {
-      if (elementListChildren.length > 0 && !inListChildren) {
-        inListChildren = true;
-      }
-
-      const isListItem =
-        child.type === "numbered_list_item" ||
-        child.type === "bulleted_list_item";
-      const isLastChild = index === children.length - 1;
-
-      if (
-        (child.type !== "numbered_list_item" &&
-          child.type !== "bulleted_list_item" &&
-          elementListChildren.length > 0) ||
-        (isLastChild && isListItem && elementListChildren.length > 0)
-      ) {
-        if (isLastChild) {
-          elementListChildren.push(
-            transformBlockToHtml(child, inListChildren, elementListChildren)
-          );
-        }
-
-        inListChildren = false;
-
-        const isNumbered = elementListChildren.includes("<ol>");
-
-        elementListChildren.push(isNumbered ? "</ol>" : "</ul>");
-        childrenHtmlContents += elementListChildren.join("");
-        elementListChildren.length = 0;
-      }
-
-      childrenHtmlContents += transformBlockToHtml(
-        child,
-        inListChildren,
-        elementListChildren
-      );
-
-      index++;
-    }
-
-    pageHtmlContents += transformBlockToHtml(
-      block,
-      inListChildren,
-      elementListChildren,
-      childrenHtmlContents
-    );
-  }
+  const pageHtmlContents: Html = await processBlocks(blocks);
 
   const css = loadStylesheet();
   const title = extractTitle(page);
@@ -175,4 +103,130 @@ export async function renderPage(
     title,
     html,
   };
+}
+
+async function processBlocks(
+  blocks: PartialBlockObjectResponse[] | BlockObjectResponse[]
+): Promise<Html> {
+  let pageHtmlContents: Html = "";
+  const elementList: Html[] = [];
+  let inList = false;
+
+  let blockIndex = 0;
+  const blockLastIndex = blocks.length - 1;
+
+  for (const block of blocks) {
+    if (!isBlockObjectResponse(block)) {
+      continue;
+    }
+
+    if (elementList.length > 0 && !inList) {
+      inList = true;
+    }
+
+    const isListItem = checkIsItemList(block);
+    const isLastBock = blockIndex === blockLastIndex;
+
+    const {htmlContentsResult, inListResult} = compileNotionList(
+      block,
+      elementList,
+      isLastBock,
+      isListItem,
+      inList
+    );
+
+    if (!inListResult) {
+      inList = false;
+      pageHtmlContents += htmlContentsResult;
+    }
+
+    if (!block.has_children) {
+      pageHtmlContents += transformBlockToHtml(block, inList, elementList);
+
+      blockIndex++;
+      continue;
+    }
+
+    const blockChildrenProcessed = await processBlockChildren(block);
+    pageHtmlContents += transformBlockToHtml(
+      block,
+      inList,
+      elementList,
+      blockChildrenProcessed
+    );
+
+    blockIndex++;
+  }
+
+  return pageHtmlContents;
+}
+
+const compileNotionList = (
+  child: BlockObjectResponse,
+  elementList: string[],
+  inLastItem: boolean,
+  isListItem: boolean,
+  inList: boolean
+): CompileNotionListProps => {
+  if (
+    (child.type !== "numbered_list_item" &&
+      child.type !== "bulleted_list_item" &&
+      elementList.length > 0) ||
+    (inLastItem && isListItem && elementList.length > 0)
+  ) {
+    if (inLastItem && isListItem) {
+      elementList.push(transformBlockToHtml(child, inList, elementList));
+    }
+
+    const isNumbered = elementList.includes("<ol>");
+
+    elementList.push(isNumbered ? "</ol>" : "</ul>");
+    const htmlResult = elementList.join("");
+    elementList.length = 0;
+
+    return {inListResult: false, htmlContentsResult: htmlResult};
+  }
+
+  return {inListResult: true, htmlContentsResult: ""};
+};
+
+async function processBlockChildren(block: BlockObjectResponse): Promise<Html> {
+  const elementListChildren: Html[] = [];
+  let inListChildren = false;
+  const children = await fetchBlockChildren(block.id);
+  let childrenHtmlContents: Html = "";
+
+  let index = 0;
+
+  for (const child of children) {
+    if (elementListChildren.length > 0 && !inListChildren) {
+      inListChildren = true;
+    }
+
+    const isListItem = checkIsItemList(child);
+    const isLastChild = index === children.length - 1;
+
+    const {htmlContentsResult, inListResult} = compileNotionList(
+      child,
+      elementListChildren,
+      isLastChild,
+      isListItem,
+      inListChildren
+    );
+
+    if (!inListResult) {
+      inListChildren = false;
+      childrenHtmlContents += htmlContentsResult;
+    }
+
+    index++;
+
+    childrenHtmlContents += transformBlockToHtml(
+      child,
+      inListChildren,
+      elementListChildren
+    );
+  }
+
+  return childrenHtmlContents;
 }
