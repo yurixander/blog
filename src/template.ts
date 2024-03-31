@@ -83,7 +83,6 @@ export async function renderPage(
 ): Promise<RenderedPage> {
   const blocks = await fetchPageContents(page.id);
   const pageHtmlContents: Html = await processBlocks(blocks);
-
   const css = loadStylesheet();
   const title = extractTitle(page);
   const coverWithTitle = extractCover(page);
@@ -142,12 +141,13 @@ async function processBlocks(
 
     if (!block.has_children) {
       pageHtmlContents += transformBlockToHtml(block, inList, elementList);
-
       blockIndex++;
+
       continue;
     }
 
     const blockChildrenProcessed = await processBlockChildren(block);
+
     pageHtmlContents += transformBlockToHtml(
       block,
       inList,
@@ -181,7 +181,9 @@ const compileNotionList = (
     const isNumbered = elementList.includes("<ol>");
 
     elementList.push(isNumbered ? "</ol>" : "</ul>");
+
     const htmlResult = elementList.join("");
+
     elementList.length = 0;
 
     return {inListResult: false, htmlContentsResult: htmlResult};
@@ -195,7 +197,6 @@ async function processBlockChildren(block: BlockObjectResponse): Promise<Html> {
   let inListChildren = false;
   const children = await fetchBlockChildren(block.id);
   let childrenHtmlContents: Html = "";
-
   let index = 0;
 
   for (const child of children) {

@@ -42,6 +42,7 @@ export function renderTemplate<T extends IndexTemplateReplacements>(
 
 function extractPostsProps(): PostProp[] {
   const workspacePath = requireEnvVariable(EnvironmentVariable.WorkspacePath);
+
   const workspacePostsPath = requireEnvVariable(
     EnvironmentVariable.WorkspacePostFolder
   );

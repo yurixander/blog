@@ -156,11 +156,13 @@ function createToggleableElement(
 ): Html {
   const summaryTitle = createHtmlElement({tag: headingType, contents: title});
   const summary = createHtmlElement({tag: "summary", contents: summaryTitle});
+
   const detailsContent = createHtmlElement({
     tag: "div",
     args: `class="details-container"`,
     contents: content,
   });
+
   return createHtmlElement({
     tag: "details",
     contents: `${summary}${detailsContent}`,
@@ -179,18 +181,23 @@ export function transformRichTextToHtml(richText: RichTextItemResponse): Html {
   if (richText.annotations.bold) {
     listTag.unshift("b");
   }
+
   if (richText.annotations.italic) {
     listTag.unshift("i");
   }
+
   if (richText.annotations.underline) {
     listTag.unshift("u");
   }
+
   if (richText.annotations.strikethrough) {
     listTag.unshift("del");
   }
+
   if (richText.annotations.color !== "default") {
     args = extractColor(richText.annotations.color);
   }
+
   if (richText.annotations.code) {
     isCode = true;
   }
@@ -205,6 +212,7 @@ export function transformRichTextToHtml(richText: RichTextItemResponse): Html {
       args: `href="${richText.text.link?.url}" ${args}`,
     });
   }
+
   return createHtmlElement({
     tag: isCode ? "code" : "span",
     contents: text,
@@ -423,12 +431,15 @@ const calloutTransformer: Transformer<CalloutBlockObjectResponse> = (
   switch (iconType) {
     case "external":
       iconSrc = callout.callout.icon.external.url;
+
       break;
     case "emoji":
       iconSrc = callout.callout.icon.emoji;
+
       break;
     case "file":
       iconSrc = callout.callout.icon.file.url;
+
       break;
     default:
       throw new Error(`Icon type is undefined`);
